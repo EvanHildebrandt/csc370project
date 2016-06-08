@@ -1,36 +1,26 @@
 CREATE TABLE Posts
 (
-    id int AUTO_INCREMENT,
-    subsaiddit_title VARCHAR(255) NOT NULL,
-    post_title VARCHAR(255) NOT NULL,
-    post_text TEXT,
-    post_url VARCHAR(511),
-    post_last_modified TIMESTAMP NOT NULL,
-    FOREIGN KEY subsaiddit_title
-        REFERENCES Subsaiddits(title),
-    PRIMARY KEY (id)
+    id int AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    text_content TEXT,
+    url VARCHAR(511),
+    published TIMESTAMP NOT NULL,
+    last_modified TIMESTAMP,
+    author_id int REFERENCES Accounts(id) NOT NULL,
+    subsaiddit_title VARCHAR(255) REFERENCES Subsaiddits(title) NOT NULL
 );
 
-CREATE TABLE Favorite
+CREATE TABLE Votes
 (
-    FOREIGN KEY account_id
-        REFERENCES Accounts(id),
-    FOREIGN KEY post_id
-        REFERENCES Posts(id)
+    up_down BOOLEAN NOT NULL,
+    account_id REFERENCES Accounts(id) NOT NULL,
+    post_id REFERENCES Posts(id),
+    comment_id REFERENCES Comments(id)
 );
 
-CREATE TABLE Downvote
+CREATE TABLE Comments
 (
-    FOREIGN KEY account_id
-        REFERENCES Accounts(id),
-    FOREIGN KEY post_id
-        REFERENCES Posts(id)
-);
-
-CREATE TABLE Upvote
-(
-    FOREIGN KEY account_id
-        REFERENCES Accounts(id),
-    FOREIGN KEY post_id
-        REFERENCES Posts(id)
+    id int AUTO_INCREMENT PRIMARY KEY,
+    text_content TEXT NOT NULL,
+    published TIMESTAMP NOT NULL
 );
