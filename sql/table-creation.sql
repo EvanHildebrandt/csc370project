@@ -9,7 +9,7 @@ CREATE TABLE Posts
     FOREIGN KEY subsaiddit_title
         REFERENCES Subsaiddits(title),
     PRIMARY KEY (id)
-)
+);
 
 CREATE TABLE Favorite
 (
@@ -17,7 +17,7 @@ CREATE TABLE Favorite
         REFERENCES Accounts(id),
     FOREIGN KEY post_id
         REFERENCES Posts(id)
-)
+);
 
 CREATE TABLE Downvote
 (
@@ -25,7 +25,7 @@ CREATE TABLE Downvote
         REFERENCES Accounts(id),
     FOREIGN KEY post_id
         REFERENCES Posts(id)
-)
+);
 
 CREATE TABLE Upvote
 (
@@ -33,4 +33,4 @@ CREATE TABLE Upvote
         REFERENCES Accounts(id),
     FOREIGN KEY post_id
         REFERENCES Posts(id)
-)
+);
