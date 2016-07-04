@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="ui text container">
+  <h1 class="ui inverted header">
+    {{ subsaiddit }}
+    <hr>
+    {{ posts }}
+  </h1>
+</div>
+  {% from "_formhelpers.html" import render_field %}
+
+  <form method=post action="/s/{{ subsaiddit.subsaiddit_title }}">
+  <dl>
+    {{ render_field(form.title) }}
+    {{ render_field(form.text) }}
+  </dl>
+  <p><input type=submit value=Post>
+  </form>
+{% endblock %}

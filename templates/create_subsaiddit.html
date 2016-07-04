@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+{% from "_formhelpers.html" import render_field %}
+  <form method=post action="/create">
+  <dl>
+    {{ render_field(form.title) }}
+    {{ render_field(form.description) }}
+    {{ render_field(form.is_default) }}
+  </dl>
+  <p><input type=submit value=Create>
+  </form>
+{% endblock %}
