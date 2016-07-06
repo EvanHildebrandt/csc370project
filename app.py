@@ -1,9 +1,14 @@
-from flask import Flask, session, render_template, request, json, redirect, url_for
+from flask import Flask, flash, session, render_template, request, json, redirect, url_for
 import MySQLdb as db
 import MySQLdb.cursors
 import datetime
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 import hashlib, uuid
+
+################################################
+#App initilization
+################################################
+
 app = Flask(__name__)
 
 #Secret key for sessions
@@ -19,7 +24,13 @@ conn = MySQLdb.connect(
 )
 cursor = conn.cursor()
 
+#Global Variables
+loggedIn = False
+
+################################################
 #Form creation and validation
+################################################
+
 class RegistrationForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=25)])
     password = PasswordField('New Password', [
@@ -42,8 +53,9 @@ class PostForm(Form):
     text = StringField('Text', [validators.Length(min=4)])
 
 
-#Global Variables
-loggedIn = False
+################################################
+#Requests and Routing
+################################################
 
 #Before Request Logic
 @app.before_request
@@ -77,13 +89,17 @@ def login():
         password = form.password.data
         #Attempt to login user
         if login_user(username, password):
+            flash(u'Logged In', 'success')
             return redirect(url_for('index'))
+        else:
+            flash(u'Incorrect username or password', 'error')
     return render_template('login.html', form=form)
 
 #Logout Route
 @app.route("/logout")
 def logout():
     session.pop('user', None)
+    flash(u'Logged Out', 'success')
     return redirect(url_for('index'))
 
 #Register Page + Form Handling
@@ -100,6 +116,10 @@ def register():
             #Attempt to register user
             if register_user(username, password_1):
                 return redirect(url_for('login'))
+            else:
+                flash(u'Registeration failed', 'error')
+        else:
+            flash(u'Passwords must match', 'error')
     return render_template('register.html', form=form)
 
 #Register Page + Form Handling
@@ -112,21 +132,34 @@ def create_subsaiddit():
         description = form.description.data
         is_default = form.is_default.data
         if new_subsaiddit(title, description, is_default):
+            flash(u'Subsaiddit Created failed', 'error')
             return redirect(url_for('create_subsaiddit'))
+        else:
+            flash(u'Subsaiddit Creation failed', 'error')
     return render_template('create_subsaiddit.html', form=form)
 
 #View and post to subsaiddit
 @app.route('/s/<subsaiddit_title>', methods=['GET', 'POST'])
 def view_subsaiddit(subsaiddit_title):
     subsaiddit = get_subsaiddit(subsaiddit_title)
+    if (subsaiddit == None):
+        flash(u'Subsaiddit ' + subsaiddit_title + ' does not exist', 'error')
+        return redirect(url_for('index'))
+
     form = PostForm(request.form)
     if request.method == 'POST' and form.validate():
         title = form.title.data
         text = form.text.data
-        new_post(subsaiddit['id'], title, text)
+        if new_post(subsaiddit['id'], title, text):
+            flash(u'Post Created', 'success')
 
     posts = get_posts([str(subsaiddit['id'])])
     return render_template('subsaiddit.html', subsaiddit=subsaiddit, posts=posts, form=form)
+
+
+################################################
+#Model functions
+################################################
 
 #Register User
 def register_user(username, password):
@@ -136,6 +169,7 @@ def register_user(username, password):
     count = cursor.fetchone()
     print count
     if (count['COUNT(id)'] > 0):
+        flash(u'That username is already in use', 'error')
         return False
     else:
         #Create salt and hash password
@@ -201,16 +235,22 @@ def get_subsaiddits():
     return subsaiddits
 
 def get_subsaiddit(subsaiddit_title):
-    print subsaiddit_title
     cursor.execute("SELECT * FROM subsaiddits WHERE subsaiddits.subsaiddit_title = %s", [subsaiddit_title])
     subsaiddit = cursor.fetchone()
     return subsaiddit
 
 def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
-    print id_list
     cursor.execute("SELECT * FROM posts WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
     return cursor.fetchall()
 
+################################################
+#Helper functions
+################################################
+
+
+################################################
+#Main
+################################################
 if __name__ == "__main__":
 	app.run(debug=True)
