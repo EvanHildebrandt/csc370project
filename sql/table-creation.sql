@@ -25,7 +25,7 @@ CREATE TABLE Posts
     text_content TEXT,
     url VARCHAR(511),
     created TIMESTAMP NOT NULL,
-    last_modified TIMESTAMP,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by int REFERENCES Accounts(id) ON DELETE SET NULL,
     subsaiddit INT REFERENCES Subsaiddits(id) ON DELETE SET NULL
 );
