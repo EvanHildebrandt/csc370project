@@ -52,6 +52,8 @@ class PostForm(Form):
     title = StringField('Title', [validators.Length(min=4, max=25)])
     text = StringField('Text', [validators.Length(min=4)])
 
+class CommentForm(Form):
+    text = StringField('Text', [validators.Length(min=4)])
 
 ################################################
 #Requests and Routing
@@ -165,6 +167,36 @@ def vote():
     else:
         return "Failed to submit vote. Make sure you aren't voting a second time on the same post/comment."
 
+#View post
+@app.route('/post/<post_id>', methods=['GET'])
+def post(post_id):
+    post = get_post(post_id);
+    return render_template('view_post.html', post=post)
+
+#Comment creation
+@app.route("/comment/<post_id>/<comment_id>", methods=['GET', 'POST'])
+def comment(post_id, comment_id):
+    form = CommentForm(request.form)
+    #If post then handle input
+    if request.method == 'POST' and form.validate():
+        text = form.text
+
+        if new_comment(text, post_id, comment_id):
+            flash(u'Comment Created', 'success')
+            return redirect(url_for('post', post_id=post_id))
+
+        else:
+            flash(u'Comment Creation failed', 'error')
+    return render_template('comment.html', form=form, post_id=post_id, comment_id=comment_id)
+
+#Delete post
+@app.route('/deletepost', methods=['POST'])
+def delete_post():
+    success = delete_post(request.json['postid'])
+    if success:
+        return "Post Deleted"
+    else:
+        return "Access Denied", 401
 
 ################################################
 #Model functions
@@ -257,6 +289,37 @@ def vote(up_down, post_id, comment_id):
     account_id = session['user']['id']
     try:
         cursor.execute("INSERT INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
+        conn.commit()
+    except Exception:
+        return False
+    return True
+
+def new_comment(text, post_id, comment_id):
+    text_content = conn.escape(text)
+    created = str(datetime.datetime.now())
+    created_by = session['user']['id']
+
+    if comment_id == 'NULL':
+        cursor.execute("INSERT INTO Comments (text_content, created, post, reply_to, created_by) VALUES(%s,%s,%s,NULL,%s)", [text_content, created, post_id, created_by])
+    else:
+        cursor.execute("INSERT INTO Comments (text_content, created, post, reply_to, created_by) VALUES(%s,%s,%s,%s,%s)", [text_content, created, post_id, comment_id, created_by])
+    conn.commit()
+    return True
+
+def get_post(post_id):
+    cursor.execute("SELECT * FROM Posts WHERE id = %s", [post_id])
+    post = cursor.fetchone()
+    return post
+
+def delete_post(post_id):
+    cursor.execute("SELECT * FROM Posts WHERE id = %s", [post_id])
+    post = cursor.fetchone()
+
+    if post['created_by'] != session['user']['id']:
+        return False
+
+    try:
+        cursor.execute("DELETE FROM Posts WHERE id = %s", [post_id])
         conn.commit()
     except Exception:
         return False

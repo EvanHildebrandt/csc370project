@@ -44,10 +44,9 @@ CREATE TABLE Comments
     id int AUTO_INCREMENT PRIMARY KEY,
     text_content TEXT NOT NULL,
     created TIMESTAMP NOT NULL,
-    post int REFERENCES Posts(id),
-    reply_to int NULL,
-    CONSTRAINT post_reply FOREIGN KEY(reply_to)
-    REFERENCES Comments(id),
+    post int NOT NULL,
+    FOREIGN KEY (post) REFERENCES Posts(id) ON DELETE CASCADE,
+    reply_to int REFERENCES Comments(id),
     created_by int REFERENCES Accounts(id) ON DELETE SET NULL
 );
 

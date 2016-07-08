@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block body %}
+<script type = "text/javascript" language = "javascript">
+  function vote(updown, postid, commentid){
+    var data = {};
+    data['postid'] = postid;
+    // Instead of using a null commentid for a vote on a post and not a comment,
+    // use -1, so we can keep the unique property on votes on posts
+    data['commentid'] = commentid;
+    data['updown'] = updown;
+
+    $.ajax({
+      type : "POST",
+      url : "/vote",
+      data: JSON.stringify(data, null, '\t'),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+          alert(result);
+      }
+    });
+  };
+
+  function deletepost(postid){
+    var data = {};
+    data['postid'] = postid;
+
+    $.ajax({
+      type : "POST",
+      url : "/deletepost",
+      data: JSON.stringify(data, null, '\t'),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+          alert(result);
+          window.location.href = "/";
+      },
+      error: function(result) {
+        alert("Failed to Delete post. Make sure you are the creator of this post");
+      }
+    });
+  };
+</script>
+<div class="ui text container">
+  <h1 class="ui inverted header">
+    {{ subsaiddit }}
+    <hr>
+      {{ post }}
+      <input type=button value=Upvote onclick="vote(true, '{{ post.id }}', -1)">
+      <input type=button value=Downvote onclick="vote(false, '{{ post.id }}', -1)">
+      <input type=button value="Comment" onclick="window.location='/comment/{{ post.id }}/NULL'" />
+      <input type=button value=Delete onclick="deletepost('{{ post.id }}')">
+  </h1>
+</div>
+{% endblock %}
