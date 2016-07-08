@@ -1,7 +1,31 @@
 {% extends "layout.html" %}
 {% block body %}
+<script type = "text/javascript" language = "javascript">
+  function change_subscription(subscribe){
+    var data = {};
+    data['subscribe'] = subscribe;
+    data['subsaiddit_id'] = {{ subsaiddit.id }};
+
+    $.ajax({
+      type : "POST",
+      url : "/changesubscription",
+      data: JSON.stringify(data, null, '\t'),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+          alert("Subscription Updated");
+          location.reload();
+      }
+    });
+  };
+</script>
 <div class="ui text container">
   <h1 class="ui inverted header">
+    {% if is_subscribed %}
+      <input type=button value=Unsubscribe onclick="change_subscription(false)">
+    {% else %}
+      <input type=button value=Subscribe onclick="change_subscription(true)">
+    {% endif %}
+    <br>
     {{ subsaiddit }}
     <hr>
     {% for post in posts %}

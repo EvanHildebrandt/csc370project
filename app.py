@@ -55,6 +55,9 @@ class PostForm(Form):
 class CommentForm(Form):
     text = StringField('Text', [validators.Length(min=4)])
 
+class FriendForm(Form):
+    username = StringField('Friend\'s Username', [validators.Length(min=4, max=25)])
+
 ################################################
 #Requests and Routing
 ################################################
@@ -144,6 +147,7 @@ def create_subsaiddit():
 @app.route('/s/<subsaiddit_title>', methods=['GET', 'POST'])
 def view_subsaiddit(subsaiddit_title):
     subsaiddit = get_subsaiddit(subsaiddit_title)
+    is_subscribed = get_is_subscribed(subsaiddit['id'])
     if (subsaiddit == None):
         flash(u'Subsaiddit ' + subsaiddit_title + ' does not exist', 'error')
         return redirect(url_for('index'))
@@ -156,7 +160,7 @@ def view_subsaiddit(subsaiddit_title):
             flash(u'Post Created', 'success')
 
     posts = get_posts([str(subsaiddit['id'])])
-    return render_template('subsaiddit.html', subsaiddit=subsaiddit, posts=posts, form=form)
+    return render_template('subsaiddit.html', subsaiddit=subsaiddit, posts=posts, form=form, is_subscribed=is_subscribed)
 
 #Vote on post or comment
 @app.route('/vote', methods=['POST'])
@@ -168,26 +172,31 @@ def vote():
         return "Failed to submit vote. Make sure you aren't voting a second time on the same post/comment."
 
 #View post
-@app.route('/post/<post_id>', methods=['GET'])
-def post(post_id):
+@app.route('/s/<subsaiddit_title>/<post_id>', methods=['GET'])
+def post(subsaiddit_title, post_id):
     post = get_post(post_id);
-    return render_template('view_post.html', post=post)
+    return render_template('view_post.html', post=post, subsaiddit_title=subsaiddit_title)
 
 #Comment creation
-@app.route("/comment/<post_id>/<comment_id>", methods=['GET', 'POST'])
-def comment(post_id, comment_id):
+@app.route("/comment/<subsaiddit_title>/<post_id>/<comment_id>", methods=['GET', 'POST'])
+def comment(subsaiddit_title, post_id, comment_id):
     form = CommentForm(request.form)
     #If post then handle input
     if request.method == 'POST' and form.validate():
         text = form.text
 
+        #Instead of using a null commentid for a vote on a post and not a comment,
+        #use -1, so we can keep the unique property on votes on posts
+        if comment_id == 'NULL':
+            comment_id = -1
+
         if new_comment(text, post_id, comment_id):
             flash(u'Comment Created', 'success')
-            return redirect(url_for('post', post_id=post_id))
+            return redirect(url_for('post', subsaiddit_title=subsaiddit_title, post_id=post_id))
 
         else:
             flash(u'Comment Creation failed', 'error')
-    return render_template('comment.html', form=form, post_id=post_id, comment_id=comment_id)
+    return render_template('comment.html', form=form, subsaiddit_title=subsaiddit_title, post_id=post_id, comment_id=comment_id)
 
 #Delete post
 @app.route('/deletepost', methods=['POST'])
@@ -196,7 +205,30 @@ def delete_post():
     if success:
         return "Post Deleted"
     else:
-        return "Access Denied", 401
+        return "Failed to Delete post. Make sure you are the creator of this post", 401
+
+#Subscribe or Unsubscrive
+@app.route('/changesubscription', methods=['POST'])
+def change_subscription():
+    change_subscription(request.json['subscribe'], request.json['subsaiddit_id'])
+    return ""
+
+#Friendship creation
+@app.route("/createfriendship", methods=['GET', 'POST'])
+def create_friendship():
+    form = FriendForm(request.form)
+    #If post then handle input
+    if request.method == 'POST' and form.validate():
+        friend = form.username.data
+
+        if create_friendship(friend):
+            flash(u'Friendship Created', 'success')
+            return redirect('/')
+
+        else:
+            flash(u'Friendship Creation Failed', 'error')
+    return render_template('friendship.html', form=form)
+
 
 ################################################
 #Model functions
@@ -208,7 +240,6 @@ def register_user(username, password):
     #Check to see if username is in use
     cursor.execute("SELECT COUNT(id) FROM accounts WHERE username = %s", [username])
     count = cursor.fetchone()
-    print count
     if (count['COUNT(id)'] > 0):
         flash(u'That username is already in use', 'error')
         return False
@@ -280,6 +311,15 @@ def get_subsaiddit(subsaiddit_title):
     subsaiddit = cursor.fetchone()
     return subsaiddit
 
+def get_is_subscribed(subsaiddit_id):
+    account_id = session['user']['id']
+    cursor.execute("SELECT * FROM subscribes WHERE account_id = %s AND subsaiddit_id = %s", [account_id, subsaiddit_id])
+    subsaiddit = cursor.fetchone()
+    if subsaiddit:
+        return True
+    else:
+        return False
+
 def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
     cursor.execute("SELECT * FROM posts WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
@@ -287,6 +327,10 @@ def get_posts(subsaiddits, page=1):
 
 def vote(up_down, post_id, comment_id):
     account_id = session['user']['id']
+    up_down = conn.escape(up_down)
+    post_id = conn.escape(post_id)
+    comment_id = conn.escape(comment_id)
+
     try:
         cursor.execute("INSERT INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
         conn.commit()
@@ -324,6 +368,28 @@ def delete_post(post_id):
     except Exception:
         return False
     return True
+
+def change_subscription(change_subscription, subsaiddit_id):
+    account_id = session['user']['id']
+    subsaiddit_id = subsaiddit_id
+    if change_subscription:
+        cursor.execute("INSERT INTO Subscribes (account_id, subsaiddit_id) VALUES(%s,%s)", [account_id, subsaiddit_id])
+    else:
+        cursor.execute("DELETE FROM Subscribes WHERE account_id = %s AND subsaiddit_id = %s", [account_id, subsaiddit_id])
+    conn.commit()
+    return True
+
+def create_friendship(friend_username):
+    #Get friend's account id
+    cursor.execute("SELECT * FROM Accounts WHERE username = %s", [friend_username])
+    friend = cursor.fetchone()
+
+    if friend and friend['id'] != session['user']['id']:
+        cursor.execute("INSERT INTO Friends (account_1_id, account_2_id) VALUES(%s,%s)", [session['user']['id'], friend['id']])
+        conn.commit()
+        return True
+    else:
+        return False
 
 ################################################
 #Helper functions

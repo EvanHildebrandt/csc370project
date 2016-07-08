@@ -4,8 +4,6 @@
   function vote(updown, postid, commentid){
     var data = {};
     data['postid'] = postid;
-    // Instead of using a null commentid for a vote on a post and not a comment,
-    // use -1, so we can keep the unique property on votes on posts
     data['commentid'] = commentid;
     data['updown'] = updown;
 
@@ -34,7 +32,7 @@
           window.location.href = "/";
       },
       error: function(result) {
-        alert("Failed to Delete post. Make sure you are the creator of this post");
+        alert(result.responseText);
       }
     });
   };
@@ -44,9 +42,9 @@
     {{ subsaiddit }}
     <hr>
       {{ post }}
-      <input type=button value=Upvote onclick="vote(true, '{{ post.id }}', -1)">
-      <input type=button value=Downvote onclick="vote(false, '{{ post.id }}', -1)">
-      <input type=button value="Comment" onclick="window.location='/comment/{{ post.id }}/NULL'" />
+      <input type=button value=Upvote onclick="vote(true, '{{ post.id }}', null)">
+      <input type=button value=Downvote onclick="vote(false, '{{ post.id }}', null)">
+      <input type=button value="Comment" onclick="window.location='/comment/{{ subsaiddit_title }}/{{ post.id }}/NULL'" />
       <input type=button value=Delete onclick="deletepost('{{ post.id }}')">
   </h1>
 </div>
