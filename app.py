@@ -122,7 +122,7 @@ def register():
             flash(u'Passwords must match', 'error')
     return render_template('register.html', form=form)
 
-#Register Page + Form Handling
+#Subsaiddit creation
 @app.route("/create", methods=['GET', 'POST'])
 def create_subsaiddit():
     form = SubsaidditForm(request.form)
@@ -132,7 +132,7 @@ def create_subsaiddit():
         description = form.description.data
         is_default = form.is_default.data
         if new_subsaiddit(title, description, is_default):
-            flash(u'Subsaiddit Created failed', 'error')
+            flash(u'Subsaiddit Created', 'success')
             return redirect(url_for('create_subsaiddit'))
         else:
             flash(u'Subsaiddit Creation failed', 'error')
@@ -155,6 +155,15 @@ def view_subsaiddit(subsaiddit_title):
 
     posts = get_posts([str(subsaiddit['id'])])
     return render_template('subsaiddit.html', subsaiddit=subsaiddit, posts=posts, form=form)
+
+#Vote on post or comment
+@app.route('/vote', methods=['POST'])
+def vote():
+    success = vote(request.json['updown'], request.json['postid'], request.json['commentid'])
+    if success:
+        return "Vote successfully submitted"
+    else:
+        return "Failed to submit vote. Make sure you aren't voting a second time on the same post/comment."
 
 
 ################################################
@@ -243,6 +252,15 @@ def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
     cursor.execute("SELECT * FROM posts WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
     return cursor.fetchall()
+
+def vote(up_down, post_id, comment_id):
+    account_id = session['user']['id']
+    try:
+        cursor.execute("INSERT INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
+        conn.commit()
+    except Exception:
+        return False
+    return True
 
 ################################################
 #Helper functions

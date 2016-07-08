@@ -35,7 +35,8 @@ CREATE TABLE Votes
     up_down BOOLEAN NOT NULL DEFAULT 1,
     account_id int REFERENCES Accounts(id) ON DELETE SET NULL,
     post_id int REFERENCES Posts(id),
-    comment_id int REFERENCES Comments(id)
+    comment_id int REFERENCES Comments(id),
+    UNIQUE KEY vote (account_id, post_id, comment_id)
 );
 
 CREATE TABLE Comments
