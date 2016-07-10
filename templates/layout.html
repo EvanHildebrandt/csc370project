@@ -33,6 +33,79 @@
         // create sidebar and attach to menu open
         $('.ui.sidebar')
         .sidebar('attach events', '.toc.item');
+
+        $('.ui.dropdown').dropdown();
+
+        function change_subscription(subscribe){
+          var data = {};
+          data['subscribe'] = subscribe;
+          data['subsaiddit_id'] = 1;
+
+          $.ajax({
+            type : "POST",
+            url : "/changesubscription",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert("Subscription Updated");
+                location.reload();
+            }
+          });
+        };
+
+        function vote(updown, postid, commentid){
+          var data = {};
+          data['postid'] = postid;
+          data['commentid'] = commentid;
+          data['updown'] = updown;
+
+          $.ajax({
+            type : "POST",
+            url : "/vote",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert(result);
+            }
+          });
+        };
+
+        function deletepost(postid){
+          var data = {};
+          data['postid'] = postid;
+
+          $.ajax({
+            type : "POST",
+            url : "/deletepost",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert(result);
+                window.location.href = "/";
+            },
+            error: function(result) {
+              alert(result.responseText);
+            }
+          });
+        };
+
+        function favouritepost(postid){
+          var data = {};
+          data['postid'] = postid;
+
+          $.ajax({
+            type : "POST",
+            url : "/favouritepost",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert(result);
+            },
+            error: function(result) {
+              alert(result.responseText);
+            }
+          });
+        };
     });
     </script>
 </head>
@@ -57,35 +130,55 @@
         <a class="active item">Home</a>
         <a href="/login" class="item">Login</a>
         <a href="/register" class="item">Signup</a>
+        {% for subsaiddit in subsaiddits %}
+          {{ subsaiddit }}
+        {% endfor %}
     </div>
 
 
     <!-- Page Contents -->
     <div class="pusher">
-        <div class="ui vertical masthead center aligned segment">
+        <div class="ui vertical masthead segment">
             <div class="ui container">
                 <div class="ui large secondary pointing menu">
                     <a class="toc item">
                         <img class="side bar hamburger-icon" src="/static/images/hamburger-icon.png" alt="" />
                     </a>
                     <img class="palm-tree-icon" src="/static/images/palm-tree-icon.png" alt="" />
-                    <a href="/" class="logotype">s&#8195;u&#8195;b&#8195;s&#8195;a&#8195;i&#8195;d&#8195;d&#8195;i&#8195;t</a>
+                    <a href="/" class="logotype">s&#8195;a&#8195;i&#8195;d&#8195;d&#8195;i&#8195;t</a>
                     <div class="right item">
+                        <div class="ui compact selection dropdown">
+                          <i class="dropdown icon"></i>
+                          <div class="text">Subsaiddits</div>
+                          <div class="menu">
+                            {% for subsaiddit in subsaiddits %}
+                              <div class="item">
+                                <a href="/s/{{ subsaiddit.subsaiddit_title }}">
+                                  {{ subsaiddit.subsaiddit_title }}
+                                </a>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        </div>
                         <div class="ui basic buttons">
+                          {% if loggedIn %}
+                            <div class="ui button"><a href="/logout">Logout</a></div>
+                          {% else %}
                             <div class="ui button"><a href="/login">Login</a></div>
                             <div class="ui button"><a href="/register">Sign up</a></div>
+                          {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <ul class=flashes>
-                {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
+              {% if messages %}
+                <ul class=flashes>
+                  {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
             {% endwith %}
             {% block body %}{% endblock %}
         </div>
@@ -97,7 +190,6 @@
             </div>
         </footer>
     </div>
-
 </body>
 
 </html>

@@ -1,45 +1,29 @@
 {% extends "layout.html" %}
 {% block body %}
-<script type = "text/javascript" language = "javascript">
-  function change_subscription(subscribe){
-    var data = {};
-    data['subscribe'] = subscribe;
-    data['subsaiddit_id'] = {{ subsaiddit.id }};
-
-    $.ajax({
-      type : "POST",
-      url : "/changesubscription",
-      data: JSON.stringify(data, null, '\t'),
-      contentType: 'application/json;charset=UTF-8',
-      success: function(result) {
-          alert("Subscription Updated");
-          location.reload();
-      }
-    });
-  };
-</script>
 <div class="ui text container">
-  <h1>
+    <h1>{{ subsaiddit.subsaiddit_title }}
     {% if is_subscribed %}
-      <input type=button value=Unsubscribe onclick="change_subscription(false)">
+      <input class="ui button" type=button value="Unsubscribe" onclick="change_subscription(false)">
     {% else %}
-      <input type=button value=Subscribe onclick="change_subscription(true)">
+      <input class="ui button" type=button value="Subscribe" onclick="change_subscription(true)">
     {% endif %}
-    <br>
-    {{ subsaiddit }}
+    </h1>
+    <p>{{ subsaiddit.description }}</p>
     <hr>
+    {% from "_posthelper.html" import render_post %}
     {% for post in posts %}
-      {{ post }}
+      {{ render_post(post) }}
     {% endfor %}
-  </h1>
-</div>
+  <br>
+  <hr>
   {% from "_formhelpers.html" import render_field %}
-
-  <form method=post action="/s/{{ subsaiddit.subsaiddit_title }}">
+  <form method=post class="ui form" action="/s/{{ subsaiddit.subsaiddit_title }}">
   <dl>
+    <h3>New Post</h3>
     {{ render_field(form.title) }}
     {{ render_field(form.text) }}
   </dl>
-  <p><input type=submit value=Post>
+  <input class="ui button" type=submit value=Post>
   </form>
+</div>
 {% endblock %}

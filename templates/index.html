@@ -3,14 +3,15 @@
 <div class="ui text container">
   <h1 class="ui header">
     {% if loggedIn %}
-      Hey {{ session.user }} lol
+      Hey {{ session.user.username }} lol
     {% else %}
       Welcome lol
     {% endif %}
-    <hr>
-    {{ subsaiddits }}
-    <hr>
-    {{ posts }}
   </h1>
+  <hr>
+  {% from "_posthelper.html" import render_post %}
+  {% for post in posts %}
+    {{ render_post(post) }}
+  {% endfor %}
 </div>
 {% endblock %}

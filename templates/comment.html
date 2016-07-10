@@ -1,10 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
-  <form method=post action="/comment/{{ subsaiddit_title }}/{{ post_id }}/{{ comment_id }}">
+<div class="form-box">
+  <form class="ui form" method=post action="/comment/{{ subsaiddit_title }}/{{ post_id }}/{{ comment_id }}">
   <dl>
     {{ render_field(form.text) }}
   </dl>
   <p><input type=submit value=Post Comment>
   </form>
+</div>
 {% endblock %}

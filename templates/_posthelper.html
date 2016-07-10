@@ -1,5 +1,15 @@
 {% macro render_post(post) %}
   <div>
-    
+    <h1><a href="/s/{{ post.subsaiddit_title }}/{{ post.id }}">{{ post.title }}</a></h1>
+    <p><a href="">{{ post.username }}</a> {{ post.created.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p>{{ post.text_content }}</p>
+
+    <input class="ui green button" type=button value=Upvote onclick="vote(true, '{{ post.id }}', null)">
+    <input class="ui red button" type=button value=Downvote onclick="vote(false, '{{ post.id }}', null)">
+    <input class="ui green button" type=button value="Comment" onclick="window.location='/comment/{{ post.subsaiddit_title }}/{{ post.id }}/NULL'" />
+    <input class="ui yellow button" type=button value=Favourite onclick="favouritepost('{{ post.id }}')">
+    {% if post.created_by == 1 %}
+    <input class="ui red button"type=button value=Delete onclick="deletepost('{{ post.id }}')">
+    {% endif %}
   </div>
 {% endmacro %}

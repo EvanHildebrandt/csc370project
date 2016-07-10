@@ -26,6 +26,7 @@ cursor = conn.cursor()
 
 #Global Variables
 loggedIn = False
+subsaiddits = None
 
 ################################################
 #Form creation and validation
@@ -67,11 +68,21 @@ class FriendForm(Form):
 def before_request():
     global loggedIn
     loggedIn = 'user' in session
+    global subsaiddits
+    subsaiddits = get_subsaiddits()
+
+#Globals injection
+@app.context_processor
+def inject_globals():
+    globalsDict = {
+        'subsaiddits': subsaiddits,
+        'loggedIn' : loggedIn
+    }
+    return globalsDict
 
 #Index Page
 @app.route("/")
 def index():
-    subsaiddits = get_subsaiddits()
     id_list = []
     for subsaiddit in subsaiddits:
         id_list.append(str(subsaiddit['id']))
@@ -320,6 +331,9 @@ def get_subsaiddit(subsaiddit_title):
     return subsaiddit
 
 def get_is_subscribed(subsaiddit_id):
+    if 'user' not in session:
+        return False
+
     account_id = session['user']['id']
     cursor.execute("SELECT * FROM subscribes WHERE account_id = %s AND subsaiddit_id = %s", [account_id, subsaiddit_id])
     subsaiddit = cursor.fetchone()
@@ -330,10 +344,13 @@ def get_is_subscribed(subsaiddit_id):
 
 def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
-    cursor.execute("SELECT * FROM posts WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
+    cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
     return cursor.fetchall()
 
 def vote(up_down, post_id, comment_id):
+    if 'user' not in session:
+        return False
+
     account_id = session['user']['id']
     up_down = conn.escape(up_down)
     post_id = conn.escape(post_id)
@@ -347,6 +364,8 @@ def vote(up_down, post_id, comment_id):
     return True
 
 def new_comment(text, post_id, comment_id):
+    if 'user' not in session:
+        return False
     text_content = conn.escape(text)
     created = str(datetime.datetime.now())
     created_by = session['user']['id']
@@ -359,11 +378,13 @@ def new_comment(text, post_id, comment_id):
     return True
 
 def get_post(post_id):
-    cursor.execute("SELECT * FROM Posts WHERE id = %s", [post_id])
+    cursor.execute("SELECT * FROM Posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.id = %s", [post_id])
     post = cursor.fetchone()
     return post
 
 def delete_post(post_id):
+    if 'user' not in session:
+        return False
     cursor.execute("SELECT * FROM Posts WHERE id = %s", [post_id])
     post = cursor.fetchone()
 
@@ -378,6 +399,8 @@ def delete_post(post_id):
     return True
 
 def change_subscription(change_subscription, subsaiddit_id):
+    if 'user' not in session:
+        return False
     account_id = session['user']['id']
     subsaiddit_id = subsaiddit_id
     if change_subscription:
@@ -388,6 +411,8 @@ def change_subscription(change_subscription, subsaiddit_id):
     return True
 
 def create_friendship(friend_username):
+    if 'user' not in session:
+        return False
     #Get friend's account id
     cursor.execute("SELECT * FROM Accounts WHERE username = %s", [friend_username])
     friend = cursor.fetchone()
@@ -400,7 +425,8 @@ def create_friendship(friend_username):
         return False
 
 def favourite_post(post_id):
-    print post_id
+    if 'user' not in session:
+        return False
     account_id = session['user']['id']
     try:
         cursor.execute("INSERT INTO Favourites (account_id, post_id) VALUES(%s,%s)", [account_id, post_id])
