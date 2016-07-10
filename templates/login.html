@@ -1,11 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
-  <form method=post action="/login">
-  <dl>
-    {{ render_field(form.username) }}
-    {{ render_field(form.password) }}
-  </dl>
-  <p><input type=submit value=Login>
-  </form>
+<div class="form-box">
+    <form class="ui form" method=post action="/login">
+        <dl>
+            {{ render_field(form.username) }}
+            {{ render_field(form.password) }}
+        </dl>
+        <input class="ui green basic button" type=submit value="Log into Subsaiddit">
+    </form>
+</div>
 {% endblock %}

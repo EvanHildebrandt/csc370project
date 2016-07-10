@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="ui text container">
-  <h1 class="ui inverted header">
+  <h1 class="ui header">
     {% if loggedIn %}
-      logged in
+      Hey {{ session.user }} lol
     {% else %}
-      not logged in
+      Welcome lol
     {% endif %}
-    {{ session.user }}
     <hr>
     {{ subsaiddits }}
     <hr>
