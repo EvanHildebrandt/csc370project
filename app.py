@@ -229,6 +229,14 @@ def create_friendship():
             flash(u'Friendship Creation Failed', 'error')
     return render_template('friendship.html', form=form)
 
+#Favourite post
+@app.route('/favouritepost', methods=['POST'])
+def favourite_post():
+    success = favourite_post(request.json['postid'])
+    if success:
+        return "Post Favourited"
+    else:
+        return "Failed to favourite post. Maybe you've already favourited it?", 500
 
 ################################################
 #Model functions
@@ -390,6 +398,17 @@ def create_friendship(friend_username):
         return True
     else:
         return False
+
+def favourite_post(post_id):
+    print post_id
+    account_id = session['user']['id']
+    try:
+        cursor.execute("INSERT INTO Favourites (account_id, post_id) VALUES(%s,%s)", [account_id, post_id])
+        conn.commit()
+    except Exception:
+        return False
+    return True
+
 
 ################################################
 #Helper functions

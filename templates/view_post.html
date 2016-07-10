@@ -36,9 +36,27 @@
       }
     });
   };
+
+  function favouritepost(postid){
+    var data = {};
+    data['postid'] = postid;
+
+    $.ajax({
+      type : "POST",
+      url : "/favouritepost",
+      data: JSON.stringify(data, null, '\t'),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+          alert(result);
+      },
+      error: function(result) {
+        alert(result.responseText);
+      }
+    });
+  };
 </script>
 <div class="ui text container">
-  <h1 class="ui inverted header">
+  <h1>
     {{ subsaiddit }}
     <hr>
       {{ post }}
@@ -46,6 +64,7 @@
       <input type=button value=Downvote onclick="vote(false, '{{ post.id }}', null)">
       <input type=button value="Comment" onclick="window.location='/comment/{{ subsaiddit_title }}/{{ post.id }}/NULL'" />
       <input type=button value=Delete onclick="deletepost('{{ post.id }}')">
+      <input type=button value=Favourite onclick="favouritepost('{{ post.id }}')">
   </h1>
 </div>
 {% endblock %}

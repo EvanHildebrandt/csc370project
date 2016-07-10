@@ -61,3 +61,10 @@ CREATE TABLE Subscribes
     account_id int REFERENCES Accounts(id) ON DELETE CASCADE,
     subsaiddit_id int REFERENCES Subsaiddits(id) ON DELETE CASCADE
 );
+
+CREATE TABLE Favourites
+(
+    account_id int REFERENCES Accounts(id) ON DELETE CASCADE,
+    post_id int REFERENCES Posts(id) ON DELETE CASCADE,
+    UNIQUE KEY favorite (account_id, post_id)
+);
