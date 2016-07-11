@@ -1,12 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
-  <form method=post action="/create">
-  <dl>
-    {{ render_field(form.title) }}
-    {{ render_field(form.description) }}
-    {{ render_field(form.is_default) }}
-  </dl>
-  <p><input type=submit value=Create>
-  </form>
+<div class="form-box">
+    <h1>Create a Subsaiddit</h1>
+    <form class="ui form" method=post action="/login">
+        <dl>
+            {{ render_field(form.title) }}
+            {{ render_field(form.description) }}
+            {{ render_field(form.is_default) }}
+        </dl>
+        <input class="ui green basic button full-width" type=submit value="Create">
+    </form>
+</div>
 {% endblock %}

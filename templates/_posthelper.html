@@ -1,11 +1,29 @@
 {% macro render_post(post) %}
   <div>
-    <h1><a href="/s/{{ post.subsaiddit_title }}/{{ post.id }}">{{ post.title }}</a></h1>
-    <p><a href="">{{ post.username }}</a> {{ post.created.strftime('%Y-%m-%d %H:%M') }}</p>
-    <p>{{ post.text_content }}</p>
-
-    <input class="ui green button" type=button value=Upvote onclick="vote(true, '{{ post.id }}', null)">
-    <input class="ui red button" type=button value=Downvote onclick="vote(false, '{{ post.id }}', null)">
+      <div class="ui feed">
+        <div class="event">
+          <div class="label">
+            <img src="../static/images/user-icon.png">
+          </div>
+          <div class="content">
+            <div class="summary">
+              <a class="user">{{ post.username }}</a>
+              posted <a href="/s/{{ post.subsaiddit_title }}/{{ post.id }}" class="post-title">{{ post.title }}</a>
+              in <a class="post-title">{{ post.subsaiddit_title }}</a>
+              <div class="date">
+                {{ post.created.strftime('%Y-%m-%d %H:%M') }}
+              </div>
+            </div>
+            <div class="meta">
+              {{ post.text_content }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui buttons">
+          <button class="ui green basic button" onclick="vote(true, '{{ post.id }}', null)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></button>
+          <button class="ui red basic button" onclick="vote(false, '{{ post.id }}', null)"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i></button>
+      </div>
     <input class="ui green button" type=button value="Comment" onclick="window.location='/comment/{{ post.subsaiddit_title }}/{{ post.id }}/NULL'" />
     <input class="ui yellow button" type=button value=Favourite onclick="favouritepost('{{ post.id }}')">
     {% if post.created_by == 1 %}

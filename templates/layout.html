@@ -7,10 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- Site Properties -->
-    <title>Homepage - Semantic</title>
+    <title>Saiddit lol</title>
     <link rel="stylesheet" type="text/css" href="/static/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/static/layout.css">
     <link rel="stylesheet" type="text/css" href="/static/custom.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" media="screen" title="no title" charset="utf-8">
 
     <script src="/static/jquery-2.2.4.js"></script>
     <script src="/static/semantic.js"></script>
@@ -36,75 +39,80 @@
 
         $('.ui.dropdown').dropdown();
 
-        function change_subscription(subscribe){
-          var data = {};
-          data['subscribe'] = subscribe;
-          data['subsaiddit_id'] = 1;
+        // close alerts
+        $(".close").click(function(){
+            $(".message").hide();
+        });
 
-          $.ajax({
-            type : "POST",
-            url : "/changesubscription",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function(result) {
-                alert("Subscription Updated");
-                location.reload();
-            }
-          });
+        function change_subscription(subscribe){
+            var data = {};
+            data['subscribe'] = subscribe;
+            data['subsaiddit_id'] = 1;
+
+            $.ajax({
+                type : "POST",
+                url : "/changesubscription",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(result) {
+                    alert("Subscription Updated");
+                    location.reload();
+                }
+            });
         };
 
         function vote(updown, postid, commentid){
-          var data = {};
-          data['postid'] = postid;
-          data['commentid'] = commentid;
-          data['updown'] = updown;
+            var data = {};
+            data['postid'] = postid;
+            data['commentid'] = commentid;
+            data['updown'] = updown;
 
-          $.ajax({
-            type : "POST",
-            url : "/vote",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function(result) {
-                alert(result);
-            }
-          });
+            $.ajax({
+                type : "POST",
+                url : "/vote",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(result) {
+                    alert(result);
+                }
+            });
         };
 
         function deletepost(postid){
-          var data = {};
-          data['postid'] = postid;
+            var data = {};
+            data['postid'] = postid;
 
-          $.ajax({
-            type : "POST",
-            url : "/deletepost",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function(result) {
-                alert(result);
-                window.location.href = "/";
-            },
-            error: function(result) {
-              alert(result.responseText);
-            }
-          });
+            $.ajax({
+                type : "POST",
+                url : "/deletepost",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(result) {
+                    alert(result);
+                    window.location.href = "/";
+                },
+                error: function(result) {
+                    alert(result.responseText);
+                }
+            });
         };
 
         function favouritepost(postid){
-          var data = {};
-          data['postid'] = postid;
+            var data = {};
+            data['postid'] = postid;
 
-          $.ajax({
-            type : "POST",
-            url : "/favouritepost",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function(result) {
-                alert(result);
-            },
-            error: function(result) {
-              alert(result.responseText);
-            }
-          });
+            $.ajax({
+                type : "POST",
+                url : "/favouritepost",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(result) {
+                    alert(result);
+                },
+                error: function(result) {
+                    alert(result.responseText);
+                }
+            });
         };
     });
     </script>
@@ -127,16 +135,21 @@
 
     <!-- Sidebar Menu -->
     <div class="ui vertical sidebar menu">
-        <a class="active item">Home</a>
-        <a href="/login" class="item">Login</a>
-        <a href="/register" class="item">Signup</a>
-        {% for subsaiddit in subsaiddits %}
-          <div class="item">
-            <a href="/s/{{ subsaiddit.subsaiddit_title }}">
-              {{ subsaiddit.subsaiddit_title }}
-            </a>
-          </div>
-        {% endfor %}
+        <a href="/"class="item">Home</a>
+        {% if loggedIn %}
+        <a href="/logout" class="item">Log out</a>
+        {% else %}
+        <a href="/login" class="item">Log in</a>
+        <a href="/register" class="item">Sign up</a>
+        {% endif %}
+        <div class="item">
+            Subscribed Subsaiddits
+            <div class="menu">
+                {% for subsaiddit in subsaiddits %}
+                <a href="/s/{{ subsaiddit.subsaiddit_title }}" class="item">{{ subsaiddit.subsaiddit_title }}</a>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
 
@@ -155,36 +168,43 @@
                     <div class="right item">
                         <div class="ui basic buttons">
                             {% if loggedIn %}
-                            <div class="ui button"><a href="/logout">Logout</a></div>
+                            <div class="ui button"><a href="/logout">Log out</a></div>
                             {% else %}
                             <div class="ui button"><a href="/login">Log in</a></div>
                             <div class="ui button"><a href="/register">Sign up</a></div>
                             {% endif %}
                         </div>
                         <div class="ui compact selection dropdown">
-                          <i class="dropdown icon"></i>
-                          <div class="text">Subsaiddits</div>
-                          <div class="menu">
-                            {% for subsaiddit in subsaiddits %}
-                              <div class="item">
-                                <a href="/s/{{ subsaiddit.subsaiddit_title }}">
-                                  {{ subsaiddit.subsaiddit_title }}
-                                </a>
-                              </div>
-                            {% endfor %}
-                          </div>
+                            <i class="dropdown icon"></i>
+                            <div class="text">Subscribed Subsaiddits</div>
+                            <div class="menu">
+                                {% for subsaiddit in subsaiddits %}
+                                <div class="item">
+                                    <a href="/s/{{ subsaiddit.subsaiddit_title }}">
+                                        {{ subsaiddit.subsaiddit_title }}
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <ul class=flashes>
-                  {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
+            {% if messages %}
+            <div class="ui container">
+                <div class=flashes>
+                    {% for category, message in messages %}
+                    <div class="ui info message">
+                        <i class="close icon"></i>
+                        <div class="header">
+                            {{ message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             {% endwith %}
             {% block body %}{% endblock %}
         </div>
