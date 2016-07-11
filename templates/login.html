@@ -2,12 +2,13 @@
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
 <div class="form-box">
+    <h1>Log in to Subsaiddit</h1>
     <form class="ui form" method=post action="/login">
         <dl>
             {{ render_field(form.username) }}
             {{ render_field(form.password) }}
         </dl>
-        <input class="ui green basic button" type=submit value="Log into Subsaiddit">
+        <input class="ui green basic button full-width" type=submit value="Log in">
     </form>
 </div>
 {% endblock %}

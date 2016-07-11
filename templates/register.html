@@ -3,12 +3,13 @@
 {% from "_formhelpers.html" import render_field %}
 <div class="form-box">
     <form class="ui form" method=post action="/register">
+        <h1>Sign up for Subsaiddit</h1>
         <dl>
             {{ render_field(form.username) }}
             {{ render_field(form.password) }}
             {{ render_field(form.confirm) }}
         </dl>
-        <input class="ui green basic button" type=submit value="Register for Saiddit">
+        <input class="ui green basic button full-width" type=submit value="Sign up">
     </form>
 </div>
 {% endblock %}

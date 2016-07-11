@@ -147,6 +147,14 @@
                     <img class="palm-tree-icon" src="/static/images/palm-tree-icon.png" alt="" />
                     <a href="/" class="logotype">s&#8195;a&#8195;i&#8195;d&#8195;d&#8195;i&#8195;t</a>
                     <div class="right item">
+                        <div class="ui basic buttons">
+                            {% if loggedIn %}
+                            <div class="ui button"><a href="/logout">Logout</a></div>
+                            {% else %}
+                            <div class="ui button"><a href="/login">Log in</a></div>
+                            <div class="ui button"><a href="/register">Sign up</a></div>
+                            {% endif %}
+                        </div>
                         <div class="ui compact selection dropdown">
                           <i class="dropdown icon"></i>
                           <div class="text">Subsaiddits</div>
@@ -159,14 +167,6 @@
                               </div>
                             {% endfor %}
                           </div>
-                        </div>
-                        <div class="ui basic buttons">
-                          {% if loggedIn %}
-                            <div class="ui button"><a href="/logout">Logout</a></div>
-                          {% else %}
-                            <div class="ui button"><a href="/login">Login</a></div>
-                            <div class="ui button"><a href="/register">Sign up</a></div>
-                          {% endif %}
                         </div>
                     </div>
                 </div>

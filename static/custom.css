@@ -5,11 +5,16 @@
     border: none;
 }
 
-
-
 .ui.menu .item>img:not(.ui) {
     width: 25px;
 }
+
+@media only screen and (max-width: 700px) {
+    .masthead.segment {
+        min-height: 90vh;
+    }
+}
+
 @media only screen and (max-width: 991px) and (min-width: 768px) {
     .ui.container {
         width: 95%;
@@ -36,9 +41,14 @@
     background: #fff !important;
 }
 
+.ui.basic.buttons {
+    margin-right: 11px;
+}
+
 .ui.basic.buttons div a {
     padding: 10px 35px;
     display: block;
+    padding: 13px 35px 14px 35px;
 }
 
 .ui.basic.buttons .ui.button {
@@ -122,12 +132,6 @@ a:hover {
     display: none;
 }
 
-@media (min-width: 450px) {
-    .logotype {
-        display: block;
-    }
-}
-
 @media (min-width: 700px) {
     .palm-tree-icon {
         display: block;
@@ -138,6 +142,7 @@ a:hover {
     .logotype {
         font-size: 13px;
         margin: 16px 0 0 0;
+        display: block;
     }
 }
 
@@ -166,14 +171,25 @@ footer {
 .form-box {
     margin: 50px auto 0 auto;
     min-width: 310px;
-    max-width: 500px;
+    max-width: 450px;
     border-radius: 2px;
-    padding: 20px 10px;
-    border: 1px solid #e2e2e2;
+    padding: 20px 30px;
 }
 
 @media (min-width: 750px) {
     .form-box {
-        padding: 50px 80px;
+        padding: 40px 80px 60px 80px;
+        border: 1px solid #e2e2e2;
+        margin: 110px auto 0 auto;
     }
+}
+
+.form-box .basic.button.full-width {
+    margin-top: 14px;
+}
+
+/*Custom Elements - - - - - - - - - - - - - - - - - - - - */
+
+.full-width {
+    width: 100%;
 }
