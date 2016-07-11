@@ -131,7 +131,11 @@
         <a href="/login" class="item">Login</a>
         <a href="/register" class="item">Signup</a>
         {% for subsaiddit in subsaiddits %}
-          {{ subsaiddit }}
+          <div class="item">
+            <a href="/s/{{ subsaiddit.subsaiddit_title }}">
+              {{ subsaiddit.subsaiddit_title }}
+            </a>
+          </div>
         {% endfor %}
     </div>
 
@@ -144,8 +148,10 @@
                     <a class="toc item">
                         <img class="side bar hamburger-icon" src="/static/images/hamburger-icon.png" alt="" />
                     </a>
-                    <img class="palm-tree-icon" src="/static/images/palm-tree-icon.png" alt="" />
-                    <a href="/" class="logotype">s&#8195;a&#8195;i&#8195;d&#8195;d&#8195;i&#8195;t</a>
+                    <div class="left item">
+                        <img class="palm-tree-icon" src="/static/images/palm-tree-icon.png" alt="" />
+                        <a href="/" class="logotype"><img src="/static/images/logo.svg" alt="" /></a>
+                    </div>
                     <div class="right item">
                         <div class="ui basic buttons">
                             {% if loggedIn %}

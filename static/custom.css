@@ -113,7 +113,7 @@ a:hover {
 
 /* Custom Header Elements - - - - - - - - - - - - - - - - - - - - */
 
-.palm-tree-icon {
+.ui.menu .item>img:not(.ui).palm-tree-icon {
     width: 35px;
     height: 44px;
     display: none;
@@ -132,8 +132,12 @@ a:hover {
     display: none;
 }
 
+.secondary.pointing.menu .right.item {
+    display: none;
+}
+
 @media (min-width: 700px) {
-    .palm-tree-icon {
+    .ui.menu .item>img:not(.ui).palm-tree-icon {
         display: block;
     }
     .hamburger-icon {
@@ -143,6 +147,9 @@ a:hover {
         font-size: 13px;
         margin: 16px 0 0 0;
         display: block;
+    }
+    .secondary.pointing.menu .right.item {
+        display: inherit;
     }
 }
 
