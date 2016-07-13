@@ -3,14 +3,17 @@
 <div class="ui text container">
     <h1 class="ui header">
         {% if loggedIn %}
-        Hey {{ session.user.username }} lol
+        Hello {{ session.user.username }}
         {% else %}
-        Default Posts
+        Saiddit Homepage
         {% endif %}
     </h1>
     {% from "_posthelper.html" import render_post %}
     {% for post in posts %}
-    {{ render_post(post) }}
+        {{ render_post(post, loggedIn) }}
     {% endfor %}
+    {% if posts|length == 0 %}
+      <h2>There are no posts to show.</h2>
+    {% endif %}
 </div>
 {% endblock %}

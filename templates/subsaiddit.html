@@ -3,16 +3,16 @@
 <div class="ui text container">
     <h1>{{ subsaiddit.subsaiddit_title }}
     {% if is_subscribed %}
-      <input class="ui button" type=button value="Unsubscribe" onclick="change_subscription(false)">
+      <input class="ui red button" type=button value="Unsubscribe" onclick="change_subscription(false, {{ subsaiddit.id}})">
     {% else %}
-      <input class="ui button" type=button value="Subscribe" onclick="change_subscription(true)">
+      <input class="ui green button" type=button value="Subscribe" onclick="change_subscription(true , {{ subsaiddit.id}})">
     {% endif %}
     </h1>
     <p>{{ subsaiddit.description }}</p>
     <hr>
     {% from "_posthelper.html" import render_post %}
     {% for post in posts %}
-      {{ render_post(post) }}
+      {{ render_post(post, loggedIn) }}
     {% endfor %}
   <br>
   <hr>

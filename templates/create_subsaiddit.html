@@ -3,7 +3,7 @@
 {% from "_formhelpers.html" import render_field %}
 <div class="form-box">
     <h1>Create a Subsaiddit</h1>
-    <form class="ui form" method=post action="/login">
+    <form class="ui form" method=post action="/create">
         <dl>
             {{ render_field(form.title) }}
             {{ render_field(form.description) }}

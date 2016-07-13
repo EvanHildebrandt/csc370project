@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="ui text container">
-  {% from "_posthelper.html" import render_post %}
-  {{ render_post(post) }}
+  {% from "_posthelper.html" import render_post, render_comments %}
+  {{ render_post(post, loggedIn) }}
+  <h3 class="ui dividing header">Comments</h3>
+  {{ render_comments(post, comments, loggedIn) }}
 </div>
 {% endblock %}

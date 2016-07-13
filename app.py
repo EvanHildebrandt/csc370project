@@ -3,7 +3,7 @@ import MySQLdb as db
 import MySQLdb.cursors
 import datetime
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-import hashlib, uuid
+import hashlib, uuid, json
 
 ################################################
 #App initilization
@@ -131,6 +131,7 @@ def register():
         if (password_1 == password_2):
             #Attempt to register user
             if register_user(username, password_1):
+                flash(u'Account Created', 'success')
                 return redirect(url_for('login'))
             else:
                 flash(u'Registeration failed', 'error')
@@ -141,6 +142,10 @@ def register():
 #Subsaiddit creation
 @app.route("/create", methods=['GET', 'POST'])
 def create_subsaiddit():
+    if not loggedIn:
+        flash(u'You must be logged in to create a new subsaiddit', 'error')
+        return redirect(url_for('login'))
+
     form = SubsaidditForm(request.form)
     #If post then handle input
     if request.method == 'POST' and form.validate():
@@ -165,6 +170,9 @@ def view_subsaiddit(subsaiddit_title):
 
     form = PostForm(request.form)
     if request.method == 'POST' and form.validate():
+        if not loggedIn:
+            flash(u'You must be logged in to create a new post', 'error')
+            return redirect(url_for('login'))
         title = form.title.data
         text = form.text.data
         if new_post(subsaiddit['id'], title, text):
@@ -176,25 +184,32 @@ def view_subsaiddit(subsaiddit_title):
 #Vote on post or comment
 @app.route('/vote', methods=['POST'])
 def vote():
+    if not loggedIn:
+        return json.dumps({'success':False, 'message':"You must be logged in to vote"})
     success = vote(request.json['updown'], request.json['postid'], request.json['commentid'])
     if success:
-        return "Vote successfully submitted"
+        return json.dumps({'success':True})
     else:
-        return "Failed to submit vote. Make sure you aren't voting a second time on the same post/comment."
+        return json.dumps({'success':False, 'message':"Failed to submit vote. Make sure you aren't voting a second time on the same post/comment."})
 
 #View post
 @app.route('/s/<subsaiddit_title>/<post_id>', methods=['GET'])
 def post(subsaiddit_title, post_id):
     post = get_post(post_id);
-    return render_template('view_post.html', post=post, subsaiddit_title=subsaiddit_title)
+    comments = get_comments(post_id);
+    return render_template('view_post.html', post=post, comments=comments, subsaiddit_title=subsaiddit_title)
 
 #Comment creation
 @app.route("/comment/<subsaiddit_title>/<post_id>/<comment_id>", methods=['GET', 'POST'])
 def comment(subsaiddit_title, post_id, comment_id):
+    if not loggedIn:
+        flash(u'You must be logged in to comment', 'error')
+        return redirect(url_for('login'))
+
     form = CommentForm(request.form)
     #If post then handle input
     if request.method == 'POST' and form.validate():
-        text = form.text
+        text = form.text.data
 
         #Instead of using a null commentid for a vote on a post and not a comment,
         #use -1, so we can keep the unique property on votes on posts
@@ -221,7 +236,10 @@ def delete_post():
 #Subscribe or Unsubscrive
 @app.route('/changesubscription', methods=['POST'])
 def change_subscription():
-    change_subscription(request.json['subscribe'], request.json['subsaiddit_id'])
+    if change_subscription(request.json['subscribe'], request.json['subsaiddit_id']):
+        flash(u'Subscription update successful', 'success')
+    else:
+        flash(u'Subscription update failed', 'error')
     return ""
 
 #Friendship creation
@@ -357,7 +375,7 @@ def vote(up_down, post_id, comment_id):
     comment_id = conn.escape(comment_id)
 
     try:
-        cursor.execute("INSERT INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
+        cursor.execute("REPLACE INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
         conn.commit()
     except Exception:
         return False
@@ -381,6 +399,24 @@ def get_post(post_id):
     cursor.execute("SELECT * FROM Posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.id = %s", [post_id])
     post = cursor.fetchone()
     return post
+
+def get_comments(post_id, reply_to=-1):
+    cursor.execute("SELECT * FROM Comments JOIN accounts ON comments.created_by = accounts.id WHERE comments.post = %s AND comments.reply_to = %s", [post_id, reply_to])
+    comments = cursor.fetchall()
+    return comments
+
+def get_votes(post_id, comment_id=0, useAccount=False):
+    if useAccount:
+        if loggedIn:
+            account_id = session['user']['id']
+        else:
+            return False
+        cursor.execute("SELECT up_down, COUNT(account_id) FROM Votes WHERE post_id = %s AND comment_id = %s AND account_id = %s GROUP BY up_down", [post_id, comment_id, account_id])
+        votes = cursor.fetchone()
+    else:
+        cursor.execute("SELECT up_down, COUNT(account_id) FROM Votes WHERE post_id = %s AND comment_id = %s GROUP BY up_down", [post_id, comment_id])
+        votes = cursor.fetchall()
+    return votes
 
 def delete_post(post_id):
     if 'user' not in session:
@@ -445,4 +481,6 @@ def favourite_post(post_id):
 #Main
 ################################################
 if __name__ == "__main__":
-	app.run(debug=True)
+    app.add_template_global(get_comments, name='get_comments')
+    app.add_template_global(get_votes, name='get_votes')
+    app.run(debug=True)

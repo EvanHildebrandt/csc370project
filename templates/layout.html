@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- Site Properties -->
-    <title>Saiddit lol</title>
+    <title>Saiddit</title>
     <link rel="stylesheet" type="text/css" href="/static/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/static/layout.css">
     <link rel="stylesheet" type="text/css" href="/static/custom.css">
@@ -18,9 +18,7 @@
     <script src="/static/jquery-2.2.4.js"></script>
     <script src="/static/semantic.js"></script>
     <script>
-    $(document)
-    .ready(function() {
-
+    $(document).ready(function() {
         // fix menu when passed
         $('.masthead')
         .visibility({
@@ -43,78 +41,91 @@
         $(".close").click(function(){
             $(".message").hide();
         });
-
-        function change_subscription(subscribe){
-            var data = {};
-            data['subscribe'] = subscribe;
-            data['subsaiddit_id'] = 1;
-
-            $.ajax({
-                type : "POST",
-                url : "/changesubscription",
-                data: JSON.stringify(data, null, '\t'),
-                contentType: 'application/json;charset=UTF-8',
-                success: function(result) {
-                    alert("Subscription Updated");
-                    location.reload();
-                }
-            });
-        };
-
-        function vote(updown, postid, commentid){
-            var data = {};
-            data['postid'] = postid;
-            data['commentid'] = commentid;
-            data['updown'] = updown;
-
-            $.ajax({
-                type : "POST",
-                url : "/vote",
-                data: JSON.stringify(data, null, '\t'),
-                contentType: 'application/json;charset=UTF-8',
-                success: function(result) {
-                    alert(result);
-                }
-            });
-        };
-
-        function deletepost(postid){
-            var data = {};
-            data['postid'] = postid;
-
-            $.ajax({
-                type : "POST",
-                url : "/deletepost",
-                data: JSON.stringify(data, null, '\t'),
-                contentType: 'application/json;charset=UTF-8',
-                success: function(result) {
-                    alert(result);
-                    window.location.href = "/";
-                },
-                error: function(result) {
-                    alert(result.responseText);
-                }
-            });
-        };
-
-        function favouritepost(postid){
-            var data = {};
-            data['postid'] = postid;
-
-            $.ajax({
-                type : "POST",
-                url : "/favouritepost",
-                data: JSON.stringify(data, null, '\t'),
-                contentType: 'application/json;charset=UTF-8',
-                success: function(result) {
-                    alert(result);
-                },
-                error: function(result) {
-                    alert(result.responseText);
-                }
-            });
-        };
     });
+
+    function change_subscription(subscribe, subsaiddit_id){
+        var data = {};
+        data['subscribe'] = subscribe;
+        data['subsaiddit_id'] = subsaiddit_id;
+
+        $.ajax({
+            type : "POST",
+            url : "/changesubscription",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                location.reload();
+            }
+        });
+    };
+
+    function vote(updown, postid, commentid){
+        var data = {};
+        data['postid'] = postid;
+        data['commentid'] = commentid;
+        data['updown'] = updown;
+        $.ajax({
+            type : "POST",
+            url : "/vote",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            dataType: 'json',
+            success: function(result) {
+                console.log(result);
+                if(result.success){
+                  if(!commentid) commentid = "NULL";
+                  up = $('#up_'+postid+'_'+commentid);
+                  down = $('#down_'+postid+'_'+commentid);
+                  if (updown) {
+                    up.removeClass('basic');
+                    down.addClass('basic');
+                  } else {
+                    up.addClass('basic');
+                    down.removeClass('basic');
+                  }
+                } else {
+                  alert(result.message);
+                }
+            }
+        });
+    };
+
+    function deletepost(postid){
+        var data = {};
+        data['postid'] = postid;
+
+        $.ajax({
+            type : "POST",
+            url : "/deletepost",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert(result);
+                window.location.href = "/";
+            },
+            error: function(result) {
+                alert(result.responseText);
+            }
+        });
+    };
+
+    function favouritepost(postid){
+        var data = {};
+        data['postid'] = postid;
+
+        $.ajax({
+            type : "POST",
+            url : "/favouritepost",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function(result) {
+                alert(result);
+            },
+            error: function(result) {
+                alert(result.responseText);
+            }
+        });
+    };
     </script>
 </head>
 <body>
@@ -192,18 +203,18 @@
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-            <div class="ui container">
-                <div class=flashes>
-                    {% for category, message in messages %}
-                    <div class="ui info message">
-                        <i class="close icon"></i>
-                        <div class="header">
-                            {{ message }}
+                <div class="ui container">
+                    <div class=flashes>
+                        {% for category, message in messages %}
+                        <div class="ui info message">
+                            <i class="close icon"></i>
+                            <div class="header">
+                                {{ message }}
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
             {% endif %}
             {% endwith %}
             {% block body %}{% endblock %}
