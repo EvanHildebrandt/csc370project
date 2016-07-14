@@ -65,6 +65,19 @@
     font-size: 40px;
 }
 
+.ui.info.message .header {
+    display: inline;
+}
+
+.ui.message>:first-child {
+    float: right;
+    cursor: pointer;
+}
+
+.ui.red.button, .ui.red.buttons .button {
+    float: right;
+}
+
 /* Custom Global - - - - - - - - - - - - - - - - - - - - */
 
 html,
@@ -176,7 +189,7 @@ a:hover {
 
 footer {
     text-align: right;
-    margin: 10px 0;
+    margin: 70px 0 20px 0;
     padding : 0 10px;
     position: relative;
     bottom: 0;
@@ -223,4 +236,9 @@ footer {
 
 .ui.feed .event {
     margin-top: 40px;
+}
+
+.subsaiddit-hr {
+    margin-top: 50px;
+    border-bottom: 1px solid #000;
 }

@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="ui text container">
+    <div class="subsaiddit-hr"></div>
     <h1>{{ subsaiddit.subsaiddit_title }}
     {% if is_subscribed %}
       <input class="ui red button" type=button value="Unsubscribe" onclick="change_subscription(false, {{ subsaiddit.id}})">
@@ -9,13 +10,11 @@
     {% endif %}
     </h1>
     <p>{{ subsaiddit.description }}</p>
-    <hr>
     {% from "_posthelper.html" import render_post %}
     {% for post in posts %}
       {{ render_post(post, loggedIn) }}
     {% endfor %}
   <br>
-  <hr>
   {% from "_formhelpers.html" import render_field %}
   <form method=post class="ui form" action="/s/{{ subsaiddit.subsaiddit_title }}">
   <dl>
