@@ -1,4 +1,4 @@
--- 8a (I didn't sum the votes of the same posts)
+-- 8a
 SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF FROM Posts
      JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
      JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
