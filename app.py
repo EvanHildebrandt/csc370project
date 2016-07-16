@@ -184,18 +184,8 @@ def view_account(username):
     user = get_user(username)
     is_friend = get_is_friend(user['id'])
     if (user == None):
-        flash(u'Subsaiddit ' + usersername + ' does not exist', 'error')
+        flash(u'User ' + usersername + ' does not exist', 'error')
         return redirect(url_for('index'))
-
-    form = PostForm(request.form)
-    if request.method == 'POST' and form.validate():
-        if not loggedIn:
-            flash(u'You must be logged in to create a new post', 'error')
-            return redirect(url_for('login'))
-        title = form.title.data
-        text = form.text.data
-        if new_post(subsaiddit['id'], title, text):
-            flash(u'Post Created', 'success')
 
     posts = get_user_posts([str(user['id'])])
     return render_template('user.html', user=user, posts=posts, form=form, is_friend=is_friend)
