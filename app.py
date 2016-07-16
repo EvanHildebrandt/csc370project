@@ -221,8 +221,6 @@ def comment(subsaiddit_title, post_id, comment_id):
     if request.method == 'POST' and form.validate():
         text = form.text.data
 
-        #Instead of using a null commentid for a vote on a post and not a comment,
-        #use -1, so we can keep the unique property on votes on posts
         if comment_id == 'NULL':
             comment_id = -1
 
@@ -396,6 +394,11 @@ def vote(up_down, post_id, comment_id):
     up_down = conn.escape(up_down)
     post_id = conn.escape(post_id)
     comment_id = conn.escape(comment_id)
+
+    #Instead of using a null commentid for a vote on a post and not a comment,
+    #use -1, so we can keep the unique property on votes on posts
+    if comment_id == 'NULL':
+        comment_id = -1
 
     try:
         cursor.execute("REPLACE INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
