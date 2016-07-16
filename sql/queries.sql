@@ -1,11 +1,25 @@
--- 8a (I didn't sum the votes of the same posts) 
--- SELECT Posts.* FROM Posts
---     JOIN Votes on Votes.post_id = Posts.id
---     JOIN Accounts on Posts.created_by = Accounts.id
---     WHERE Posts.created_by="1"
---     ORDER BY up_down DESC;
+-- 8a (I didn't sum the votes of the same posts)
+SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF FROM Posts
+     JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
+     JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
+     WHERE Posts.created_by="1"
+     AND UpVotes.comment_id = 0
+     AND UpVotes.up_down = 1
+     AND DownVotes.up_down = 0
+     AND DownVotes.comment_id = 0
+	ORDER BY DIFF DESC
 
 -- 8b
+SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF FROM Posts
+     JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
+     JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
+     JOIN Friends ON 1 = Friends.account_1_id OR 1 = Friends.account_2_id
+     WHERE Posts.created_by = Friends.account_1_id OR Posts.created_by = Friends.account_2_id
+     AND UpVotes.comment_id = 0
+     AND UpVotes.up_down = 1
+     AND DownVotes.up_down = 0
+     AND DownVotes.comment_id = 0
+     ORDER BY DIFF DESC
 
 -- 8c
 SELECT Subsaiddits.* FROM Accounts
@@ -43,4 +57,5 @@ SELECT Posts.* FROM Posts
 SELECT Posts.* FROM Posts
     JOIN Subsaiddits on Subsaiddits.id = Posts.subsaiddit
     WHERE Subsaiddits.subsaiddit_title = "hello"
-    AND Posts.text_content LIKE '%anyone%';
+    AND (Subsaiddits.text_content LIKE '%anyone%'
+    OR Posts.text_content LIKE '%anyone%');

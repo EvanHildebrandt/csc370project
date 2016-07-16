@@ -3,11 +3,11 @@
       <div class="ui feed">
         <div class="event">
           <div class="label">
-            <img src="/static/images/user-icon.png">
+            <img src="/static/images/user-icon-{{ post.created_by }}.png">
           </div>
           <div class="content">
             <div class="summary">
-              <a class="user">{{ post.username }}</a>
+              <a href="/a/{{ post.username }}" class="user">{{ post.username }}</a>
               posted <a href="/s/{{ post.subsaiddit_title }}/{{ post.id }}" class="post-title">{{ post.title }}</a>
               in <a href="/s/{{ post.subsaiddit_title }}" class="post-title">{{ post.subsaiddit_title }}</a>
               <div class="date">
@@ -20,15 +20,35 @@
           </div>
         </div>
       </div>
+      {% set votes = get_votes(post.id) %}
       <div class="ui buttons">
-          {% set votes = get_votes(post.id)%}
-          {% set vote = get_votes(post.id, 0, True) %}
-          <button class="ui green {% if not vote.up_down or not loggedIn %} basic {% endif %} button" id="up_{{ post.id }}_NULL" onclick="vote(true, '{{ post.id }}', null)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></button>
-          <button class="ui red {% if vote.up_down or not loggedIn %} basic {% endif %} button" id="down_{{ post.id }}_NULL" onclick="vote(false, '{{ post.id }}', null)"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i></button>
+          {% set user_vote = get_votes(post.id, 0, True) %}
+          <button class="ui green
+            {% if user_vote == False or not user_vote.up_down %}
+              basic
+            {% endif %}
+            button" id="up_{{ post.id }}_NULL" onclick="vote(true, '{{ post.id }}', null)">
+            {% for vote in votes %}
+              {% if vote.up_down %}{{ vote.num }} {% endif %}
+            {% endfor %}
+            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+          </button>
+          <button class="ui red
+          {% if user_vote == False or user_vote.up_down %}
+            basic
+          {% endif %}
+          button" id="down_{{ post.id }}_NULL" onclick="vote(false, '{{ post.id }}', null)">
+          {% for vote in votes %}
+            {% if not vote.up_down %}{{ vote.num }} {% endif %}
+          {% endfor %}
+          <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+        </button>
       </div>
       <input class="ui green button" type=button value="Comment" onclick="window.location='/comment/{{ post.subsaiddit_title }}/{{ post.id }}/NULL'" />
       <input class="ui yellow button" type=button value=Favourite onclick="favouritepost('{{ post.id }}')">
-      <input class="ui red button"type=button value=Delete onclick="deletepost('{{ post.id }}')">
+      {% if loggedIn and session.user.id == post.created_by %}
+        <input class="ui red button"type=button value=Delete onclick="deletepost('{{ post.id }}')">
+      {% endif %}
   </div>
 {% endmacro %}
 
@@ -43,10 +63,10 @@
 {% macro render_comment(post, comment, loggedIn) %}
 <div class="comment">
   <a class="avatar">
-    <img src="/static/images/user-icon.png">
+    <img src="/static/images/user-icon-{{ comment.created_by }}.png">
   </a>
   <div class="content">
-    <a class="author">{{ comment.username }}</a>
+    <a href="/a/{{ comment.username }}" class="author">{{ comment.username }}</a>
     <div class="metadata">
       <span class="date">{{ comment.created.strftime('%Y-%m-%d %H:%M') }}</span>
     </div>
@@ -54,13 +74,31 @@
       {{ comment.text_content }}
     </div>
       <div>
+        {% set votes = get_votes(post.id, comment.id, False) %}
         <div class="ui buttons">
-            {% set votes = get_votes(post.id, comment.id) %}
-            {% set vote = get_votes(post.id, comment.id, True) %}
-            <button class="ui green {% if not vote.up_down or not loggedIn %} basic {% endif %} button" id="up_{{ post.id }}_{{ comment.id }}" onclick="vote(true, '{{ post.id }}', '{{ comment.id }}')"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></button>
-            <button class="ui red {% if vote.up_down or not loggedIn  %} basic {% endif %} button" id="down_{{ post.id }}_{{ comment.id }}" onclick="vote(false, '{{ post.id }}', '{{ comment.id }}')"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i></button>
+            {% set user_vote = get_votes(post.id, comment.id, True) %}
+            <button class="ui green
+              {% if user_vote == None or not user_vote.up_down %}
+                basic
+              {% endif %}
+              button" id="up_{{ post.id }}_{{ comment.id }}" onclick="vote(true, '{{ post.id }}', {{ comment.id }})">
+              {% for vote in votes %}
+                {% if vote.up_down %}{{ vote.num }} {% endif %}
+              {% endfor %}
+              <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+            </button>
+            <button class="ui red
+            {% if user_vote == None or user_vote.up_down %}
+              basic
+            {% endif %}
+            button" id="down_{{ post.id }}_{{ comment.id }}" onclick="vote(false, '{{ post.id }}', {{ comment.id }})">
+            {% for vote in votes %}
+              {% if not vote.up_down %}{{ vote.num }} {% endif %}
+            {% endfor %}
+            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+          </button>
         </div>
-        <a href="/comment/{{ post.subsaiddit_title }}/{{ post.id }}/{{ comment.id }}'" class="reply">Reply</a>
+        <a href="/comment/{{ post.subsaiddit_title }}/{{ post.id }}/{{ comment.id }}"><button class="ui button"/>Comment</button></a>
       </div>
     {% set children = get_comments(post.id, comment.id) %}
     {% if children %}

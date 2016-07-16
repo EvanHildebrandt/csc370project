@@ -32,11 +32,12 @@ CREATE TABLE Posts
 
 CREATE TABLE Votes
 (
+
     up_down BOOLEAN NOT NULL DEFAULT 1,
     account_id int REFERENCES Accounts(id) ON DELETE SET NULL,
     post_id int REFERENCES Posts(id),
     comment_id int REFERENCES Comments(id),
-    UNIQUE KEY vote (account_id, post_id, comment_id)
+    PRIMARY KEY vote (account_id, post_id, comment_id)
 );
 
 CREATE TABLE Comments
@@ -53,7 +54,8 @@ CREATE TABLE Comments
 CREATE TABLE Friends
 (
     account_1_id int REFERENCES Accounts(id) ON DELETE CASCADE,
-    account_2_id int REFERENCES Accounts(id) ON DELETE CASCADE
+    account_2_id int REFERENCES Accounts(id) ON DELETE CASCADE,
+    PRIMARY KEY friend (account_1_id, account_2_id)
 );
 
 CREATE TABLE Subscribes

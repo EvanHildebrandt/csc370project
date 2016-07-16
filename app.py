@@ -56,9 +56,6 @@ class PostForm(Form):
 class CommentForm(Form):
     text = StringField('Text', [validators.Length(min=4)])
 
-class FriendForm(Form):
-    username = StringField('Friend\'s Username', [validators.Length(min=4, max=25)])
-
 ################################################
 #Requests and Routing
 ################################################
@@ -181,6 +178,29 @@ def view_subsaiddit(subsaiddit_title):
     posts = get_posts([str(subsaiddit['id'])])
     return render_template('subsaiddit.html', subsaiddit=subsaiddit, posts=posts, form=form, is_subscribed=is_subscribed)
 
+#View an account and add friends
+@app.route('/a/<username>', methods=['GET', 'POST'])
+def view_account(username):
+    user = get_user(username)
+    is_friend = get_is_friend(user['id'])
+    if (user == None):
+        flash(u'Subsaiddit ' + usersername + ' does not exist', 'error')
+        return redirect(url_for('index'))
+
+    form = PostForm(request.form)
+    if request.method == 'POST' and form.validate():
+        if not loggedIn:
+            flash(u'You must be logged in to create a new post', 'error')
+            return redirect(url_for('login'))
+        title = form.title.data
+        text = form.text.data
+        if new_post(subsaiddit['id'], title, text):
+            flash(u'Post Created', 'success')
+
+    posts = get_user_posts([str(user['id'])])
+    return render_template('user.html', user=user, posts=posts, form=form, is_friend=is_friend)
+
+
 #Vote on post or comment
 @app.route('/vote', methods=['POST'])
 def vote():
@@ -243,20 +263,17 @@ def change_subscription():
     return ""
 
 #Friendship creation
-@app.route("/createfriendship", methods=['GET', 'POST'])
-def create_friendship():
-    form = FriendForm(request.form)
-    #If post then handle input
-    if request.method == 'POST' and form.validate():
-        friend = form.username.data
+@app.route("/createfriendship/<friend_id>", methods=['GET', 'POST'])
+def create_friendship(friend_id):
+    print request.headers['Referer']
 
-        if create_friendship(friend):
-            flash(u'Friendship Created', 'success')
-            return redirect('/')
+    if create_friendship(friend_id):
+        flash(u'Friendship Created', 'success')
+        return redirect(request.headers['Referer'])
+    else:
+        flash(u'Friendship Creation Failed', 'error')
+    return redirect(request.headers['Referer'])
 
-        else:
-            flash(u'Friendship Creation Failed', 'error')
-    return render_template('friendship.html', form=form)
 
 #Favourite post
 @app.route('/favouritepost', methods=['POST'])
@@ -307,6 +324,17 @@ def login_user(username, password):
         return True
     else:
         return False
+
+#Get a user
+def get_user(username):
+    username = conn.escape(username)
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", [username])
+    user = cursor.fetchone()
+    #If user does not exist return false
+    if not user:
+        return False
+    else:
+        return user
 
 def new_subsaiddit(title, description, is_default):
     title = conn.escape(title)
@@ -365,6 +393,11 @@ def get_posts(subsaiddits, page=1):
     cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
     return cursor.fetchall()
 
+def get_user_posts(users, page=1):
+    id_list = ','.join(users)
+    cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.created_by IN (%s) LIMIT 20", [id_list])
+    return cursor.fetchall()
+
 def vote(up_down, post_id, comment_id):
     if 'user' not in session:
         return False
@@ -411,11 +444,12 @@ def get_votes(post_id, comment_id=0, useAccount=False):
             account_id = session['user']['id']
         else:
             return False
-        cursor.execute("SELECT up_down, COUNT(account_id) FROM Votes WHERE post_id = %s AND comment_id = %s AND account_id = %s GROUP BY up_down", [post_id, comment_id, account_id])
+        cursor.execute("SELECT up_down, COUNT(account_id) AS num FROM Votes WHERE post_id = %s AND comment_id = %s AND account_id = %s GROUP BY up_down", [post_id, comment_id, account_id])
         votes = cursor.fetchone()
     else:
-        cursor.execute("SELECT up_down, COUNT(account_id) FROM Votes WHERE post_id = %s AND comment_id = %s GROUP BY up_down", [post_id, comment_id])
+        cursor.execute("SELECT up_down, COUNT(account_id) AS num FROM Votes WHERE post_id = %s AND comment_id = %s GROUP BY up_down", [post_id, comment_id])
         votes = cursor.fetchall()
+    print votes
     return votes
 
 def delete_post(post_id):
@@ -446,19 +480,28 @@ def change_subscription(change_subscription, subsaiddit_id):
     conn.commit()
     return True
 
-def create_friendship(friend_username):
+def get_is_friend(friend_id):
     if 'user' not in session:
         return False
-    #Get friend's account id
-    cursor.execute("SELECT * FROM Accounts WHERE username = %s", [friend_username])
-    friend = cursor.fetchone()
-
-    if friend and friend['id'] != session['user']['id']:
-        cursor.execute("INSERT INTO Friends (account_1_id, account_2_id) VALUES(%s,%s)", [session['user']['id'], friend['id']])
-        conn.commit()
+    cursor.execute("SELECT * FROM Friends WHERE (account_1_id = %s AND account_2_id = %s) OR (account_2_id = %s AND account_1_id = %s)", [session['user']['id'],friend_id,session['user']['id'],friend_id])
+    is_friend = cursor.fetchone()
+    if is_friend:
         return True
     else:
         return False
+
+def create_friendship(friend_id):
+    if 'user' not in session:
+        return False
+
+    if get_is_friend(friend_id):
+        flash(u'You are alread friends with this user', 'error')
+        return False
+
+    cursor.execute("INSERT INTO Friends (account_1_id, account_2_id) VALUES(%s,%s)", [session['user']['id'], friend_id])
+    conn.commit()
+    return True
+
 
 def favourite_post(post_id):
     if 'user' not in session:
@@ -475,12 +518,11 @@ def favourite_post(post_id):
 ################################################
 #Helper functions
 ################################################
-
+app.add_template_global(get_comments, name='get_comments')
+app.add_template_global(get_votes, name='get_votes')
 
 ################################################
 #Main
 ################################################
 if __name__ == "__main__":
-    app.add_template_global(get_comments, name='get_comments')
-    app.add_template_global(get_votes, name='get_votes')
     app.run(debug=True)

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="ui text container">
+    <div class="subsaiddit-hr"></div>
+    <h1>{{ user.username }}
+    <a href="/createfriendship/{{ user.id }}"><button class="ui green button">Add Friend</button></a>
+    </h1>
+    {% from "_posthelper.html" import render_post %}
+    {% for post in posts %}
+      {{ render_post(post, loggedIn) }}
+    {% endfor %}
+</div>
+{% endblock %}
