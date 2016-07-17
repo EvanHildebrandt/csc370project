@@ -154,7 +154,11 @@
         <a href="/register" class="item">Sign up</a>
         {% endif %}
         <div class="item">
-            Subscribed Subsaiddits
+            {% if loggedIn %}
+                Subscribed Subsaiddits
+            {% else %}
+                Default Subsaiddits
+            {% endif %}
             <div class="menu">
                 {% for subsaiddit in subsaiddits %}
                 <a href="/s/{{ subsaiddit.subsaiddit_title }}" class="item">{{ subsaiddit.subsaiddit_title }}</a>
@@ -187,7 +191,11 @@
                         </div>
                         <div class="ui compact selection dropdown">
                             <i class="dropdown icon"></i>
-                            <div class="text">Subscribed Subsaiddits</div>
+                            {% if loggedIn %}
+                                <div class="text">Subscribed Subsaiddits</div>
+                            {% else %}
+                                <div class="text">Default Subsaiddits</div>
+                            {% endif %}
                             <div class="menu">
                                 {% for subsaiddit in subsaiddits %}
                                 <div class="item">
