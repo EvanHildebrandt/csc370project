@@ -1,13 +1,20 @@
 -- 8a
-SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF FROM Posts
-     JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
-     JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
-     WHERE Posts.created_by="1"
-     AND UpVotes.comment_id = 0
-     AND UpVotes.up_down = 1
-     AND DownVotes.up_down = 0
-     AND DownVotes.comment_id = 0
-	ORDER BY DIFF DESC
+SELECT id, title, text_content, url, created, last_modified, created_by, subsaiddit, SUM(VOTES) AS RATING FROM
+    (SELECT *, COUNT(UpVotes.account_id) AS VOTES FROM Posts
+         LEFT JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
+         WHERE Posts.created_by = 1
+         AND (UpVotes.comment_id = -1 OR UpVotes.up_down IS NULL)
+         AND (UpVotes.up_down = 1 OR UpVotes.up_down IS NULL)
+         GROUP BY id
+    UNION
+    SELECT *, -COUNT(DownVotes.account_id) AS VOTES FROM Posts
+         LEFT JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
+         WHERE Posts.created_by=1
+         AND (DownVotes.comment_id = -1 OR DownVotes.up_down IS NULL)
+         AND (DownVotes.up_down = 0 OR DownVotes.up_down IS NULL)
+         GROUP BY id) A
+GROUP BY id
+ORDER BY RATING DESC;
 
 -- 8b
 SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF FROM Posts
@@ -19,7 +26,7 @@ SELECT Posts.*, COUNT(UpVotes.account_id) - COUNT(DownVotes.account_id) AS DIFF 
      AND UpVotes.up_down = 1
      AND DownVotes.up_down = 0
      AND DownVotes.comment_id = 0
-     ORDER BY DIFF DESC
+     ORDER BY DIFF DESC;
 
 -- 8c
 SELECT Subsaiddits.* FROM Accounts
