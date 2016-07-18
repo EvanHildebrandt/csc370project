@@ -188,7 +188,7 @@ def view_account(username):
         return redirect(url_for('index'))
 
     posts = get_user_posts([str(user['id'])])
-    return render_template('user.html', user=user, posts=posts, form=form, is_friend=is_friend)
+    return render_template('user.html', user=user, posts=posts, is_friend=is_friend)
 
 
 #Vote on post or comment
