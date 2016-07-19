@@ -1,12 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="ui text container">
-    <div class="subsaiddit-hr"></div>
+<div class="ui text container subsaiddit">
     <h1>{{ subsaiddit.subsaiddit_title }}
     {% if is_subscribed %}
-      <input class="ui red button" type=button value="Unsubscribe" onclick="change_subscription(false, {{ subsaiddit.id}})">
+      <input class="ui red button subscribe" type=button value="Unsubscribe" onclick="change_subscription(false, {{ subsaiddit.id}})">
     {% else %}
-      <input class="ui green button" type=button value="Subscribe" onclick="change_subscription(true , {{ subsaiddit.id}})">
+      <input class="ui green button subscribe" type=button value="Subscribe" onclick="change_subscription(true , {{ subsaiddit.id}})">
     {% endif %}
     </h1>
     <p>{{ subsaiddit.description }}</p>
