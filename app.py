@@ -378,12 +378,20 @@ def get_is_subscribed(subsaiddit_id):
 
 def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
-    cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.subsaiddit IN (%s) LIMIT 20", [id_list])
+    cursor.execute("""SELECT * FROM posts
+                        LEFT OUTER JOIN
+                            (SELECT post_id, CAST(SUM(votes.up_down) as SIGNED) as diff FROM votes WHERE votes.comment_id = 0 GROUP BY votes.post_id)
+                            V ON V.post_id = posts.id
+                        JOIN accounts ON posts.created_by = accounts.id
+                        JOIN subsaiddits ON posts.subsaiddit = subsaiddits.id
+                        WHERE posts.subsaiddit IN (%s)
+                        ORDER BY diff
+                        DESC LIMIT 20""", [id_list])
     return cursor.fetchall()
 
 def get_user_posts(users, page=1):
     id_list = ','.join(users)
-    cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits on posts.subsaiddit = subsaiddits.id WHERE posts.created_by IN (%s) LIMIT 20", [id_list])
+    cursor.execute("SELECT * FROM posts JOIN accounts ON posts.created_by = accounts.id JOIN subsaiddits ON posts.subsaiddit = subsaiddits.id WHERE posts.created_by IN (%s) LIMIT 20", [id_list])
     return cursor.fetchall()
 
 def vote(up_down, post_id, comment_id):
@@ -435,7 +443,7 @@ def get_votes(post_id, comment_id=0, useAccount=False):
         if loggedIn:
             account_id = session['user']['id']
         else:
-            return False
+            return None
         cursor.execute("SELECT up_down, COUNT(account_id) AS num FROM Votes WHERE post_id = %s AND comment_id = %s AND account_id = %s GROUP BY up_down", [post_id, comment_id, account_id])
         votes = cursor.fetchone()
     else:

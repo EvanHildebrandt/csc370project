@@ -11,7 +11,7 @@
               posted <a href="/s/{{ post.subsaiddit_title }}/{{ post.id }}" class="post-title">{{ post.title }}</a>
               in <a href="/s/{{ post.subsaiddit_title }}" class="post-title">{{ post.subsaiddit_title }}</a>
               <div class="date">
-                {{ post.created.strftime('%Y-%m-%d %H:%M') }}
+              {{ post.created.strftime('%Y-%m-%d %H:%M') }}
               </div>
             </div>
             <div class="meta">
@@ -24,22 +24,22 @@
       <div class="ui buttons">
           {% set user_vote = get_votes(post.id, 0, True) %}
           <button class="ui green
-            {% if user_vote == None or not user_vote.up_down %}
+            {% if user_vote == None or user_vote.up_down == -1 %}
               basic
             {% endif %}
-            button" id="up_{{ post.id }}_NULL" onclick="vote(true, '{{ post.id }}', null)">
+            button" id="up_{{ post.id }}_NULL" onclick="vote(1, '{{ post.id }}', null)">
             {% for vote in votes %}
-              {% if vote.up_down %}{{ vote.num }} {% endif %}
+              {% if vote.up_down == 1 %}{{ vote.num }} {% endif %}
             {% endfor %}
             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
           </button>
           <button class="ui red
-          {% if user_vote == None or user_vote.up_down %}
+          {% if user_vote == None or user_vote.up_down  == 1 %}
             basic
           {% endif %}
-          button" id="down_{{ post.id }}_NULL" onclick="vote(false, '{{ post.id }}', null)">
+          button" id="down_{{ post.id }}_NULL" onclick="vote(-1, '{{ post.id }}', null)">
           {% for vote in votes %}
-            {% if not vote.up_down %}{{ vote.num }} {% endif %}
+            {% if vote.up_down == -1 %}{{ vote.num }} {% endif %}
           {% endfor %}
           <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
         </button>
@@ -78,22 +78,22 @@
         <div class="ui buttons">
             {% set user_vote = get_votes(post.id, comment.id, True) %}
             <button class="ui green
-              {% if user_vote == None or not user_vote.up_down %}
+              {% if user_vote == None or user_vote.up_down == -1  %}
                 basic
               {% endif %}
-              button" id="up_{{ post.id }}_{{ comment.id }}" onclick="vote(true, '{{ post.id }}', {{ comment.id }})">
+              button" id="up_{{ post.id }}_{{ comment.id }}" onclick="vote(1, '{{ post.id }}', {{ comment.id }})">
               {% for vote in votes %}
-                {% if vote.up_down %}{{ vote.num }} {% endif %}
+                {% if vote.up_down == 1 %}{{ vote.num }} {% endif %}
               {% endfor %}
               <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
             </button>
             <button class="ui red
-            {% if user_vote == None or user_vote.up_down %}
+            {% if user_vote == None or user_vote.up_down == 1 %}
               basic
             {% endif %}
-            button" id="down_{{ post.id }}_{{ comment.id }}" onclick="vote(false, '{{ post.id }}', {{ comment.id }})">
+            button" id="down_{{ post.id }}_{{ comment.id }}" onclick="vote(-1, '{{ post.id }}', {{ comment.id }})">
             {% for vote in votes %}
-              {% if not vote.up_down %}{{ vote.num }} {% endif %}
+              {% if vote.up_down == -1 %}{{ vote.num }} {% endif %}
             {% endfor %}
             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
           </button>

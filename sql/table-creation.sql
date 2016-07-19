@@ -33,7 +33,7 @@ CREATE TABLE Posts
 CREATE TABLE Votes
 (
 
-    up_down BOOLEAN NOT NULL DEFAULT 1,
+    up_down TINYINT NOT NULL DEFAULT 1,
     account_id int REFERENCES Accounts(id) ON DELETE SET NULL,
     post_id int REFERENCES Posts(id),
     comment_id int REFERENCES Comments(id),

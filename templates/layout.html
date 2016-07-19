@@ -76,7 +76,7 @@
                   if(!commentid) commentid = "NULL";
                   up = $('#up_'+postid+'_'+commentid);
                   down = $('#down_'+postid+'_'+commentid);
-                  if (updown) {
+                  if (updown == 1) {
                     up.removeClass('basic');
                     down.addClass('basic');
                   } else {
