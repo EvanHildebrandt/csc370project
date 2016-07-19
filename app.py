@@ -222,7 +222,7 @@ def comment(subsaiddit_title, post_id, comment_id):
         text = form.text.data
 
         if comment_id == 'NULL':
-            comment_id = -1
+            comment_id = 0
 
         if new_comment(text, post_id, comment_id):
             flash(u'Comment Created', 'success')
@@ -395,10 +395,9 @@ def vote(up_down, post_id, comment_id):
     post_id = conn.escape(post_id)
     comment_id = conn.escape(comment_id)
 
-    #Instead of using a null commentid for a vote on a post and not a comment,
-    #use -1, so we can keep the unique property on votes on posts
+    #Since some of our mysql versions are having issues with inserting NULL, use 0
     if comment_id == 'NULL':
-        comment_id = -1
+        comment_id = 0
 
     try:
         cursor.execute("REPLACE INTO votes (up_down, account_id, post_id, comment_id) VALUES(%s,%s,%s,%s)", [up_down, account_id, post_id, comment_id])
@@ -426,7 +425,7 @@ def get_post(post_id):
     post = cursor.fetchone()
     return post
 
-def get_comments(post_id, reply_to=-1):
+def get_comments(post_id, reply_to=0):
     cursor.execute("SELECT * FROM Comments JOIN accounts ON comments.created_by = accounts.id WHERE comments.post = %s AND comments.reply_to = %s", [post_id, reply_to])
     comments = cursor.fetchall()
     return comments

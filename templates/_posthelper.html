@@ -24,7 +24,7 @@
       <div class="ui buttons">
           {% set user_vote = get_votes(post.id, 0, True) %}
           <button class="ui green
-            {% if user_vote == False or not user_vote.up_down %}
+            {% if user_vote == None or not user_vote.up_down %}
               basic
             {% endif %}
             button" id="up_{{ post.id }}_NULL" onclick="vote(true, '{{ post.id }}', null)">
@@ -34,7 +34,7 @@
             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
           </button>
           <button class="ui red
-          {% if user_vote == False or user_vote.up_down %}
+          {% if user_vote == None or user_vote.up_down %}
             basic
           {% endif %}
           button" id="down_{{ post.id }}_NULL" onclick="vote(false, '{{ post.id }}', null)">
