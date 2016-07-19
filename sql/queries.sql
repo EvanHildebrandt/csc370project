@@ -44,9 +44,9 @@ ORDER BY RATING DESC;
 
 -- 8c
 -- Account "A"'s subscribed subsaiddits and default ones
-SELECT Subsaiddits.* FROM Accounts
+SELECT DISTINCT Subsaiddits.* FROM Accounts
     JOIN Subscribes on Accounts.id = Subscribes.account_id
-    JOIN Subsaiddits on Subscribes.subsaiddit_id = Subsaiddits.id
+    JOIN Subsaiddits on Subscribes.subsaiddit_id = Subsaiddits.id OR Subsaiddits.is_default = 1
     Where Accounts.username = "A";
 
 
