@@ -1,44 +1,21 @@
 -- 8a 
 -- All posts created by account 1, sorted by highest rating
-SELECT id, title, text_content, url, created, last_modified, created_by, subsaiddit, SUM(VOTES) AS RATING FROM
-    (SELECT *, COUNT(UpVotes.account_id) AS VOTES FROM Posts
-         LEFT JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
-         WHERE Posts.created_by = 1
-         AND (UpVotes.comment_id = -1 OR UpVotes.up_down IS NULL)
-         AND (UpVotes.up_down = 1 OR UpVotes.up_down IS NULL)
-         GROUP BY id
-    UNION
-    SELECT *, -COUNT(DownVotes.account_id) AS VOTES FROM Posts
-         LEFT JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
-         WHERE Posts.created_by=1
-         AND (DownVotes.comment_id = -1 OR DownVotes.up_down IS NULL)
-         AND (DownVotes.up_down = 0 OR DownVotes.up_down IS NULL)
-         GROUP BY id) A
-GROUP BY id
-ORDER BY RATING DESC;
+SELECT Posts.*, diff FROM Posts
+    LEFT OUTER JOIN
+        (SELECT post_id, CAST(SUM(votes.up_down) as SIGNED) as diff FROM votes WHERE votes.comment_id = 0 GROUP BY votes.post_id) V ON V.post_id = posts.id
+    WHERE Posts.created_by=1
+    ORDER BY diff DESC;
 
 
 
 -- 8b
 -- All posts from account 1's Friends, sorted by highest rating
-SELECT id, title, text_content, url, created, last_modified, created_by, subsaiddit, SUM(VOTES) AS RATING FROM
-    (SELECT *, COUNT(UpVotes.account_id) AS VOTES FROM Posts
-         LEFT JOIN Votes AS UpVotes on UpVotes.post_id = Posts.id
-         JOIN Friends ON 1 = Friends.account_1_id OR 1 = Friends.account_2_id
-         WHERE (Posts.created_by = Friends.account_1_id OR Posts.created_by = Friends.account_2_id) AND Posts.created_by <> 1
-         AND (UpVotes.comment_id = -1 OR UpVotes.up_down IS NULL)
-         AND (UpVotes.up_down = 1 OR UpVotes.up_down IS NULL)
-         GROUP BY id
-    UNION
-    SELECT *, -COUNT(DownVotes.account_id) AS VOTES FROM Posts
-         LEFT JOIN Votes AS DownVotes on DownVotes.post_id = Posts.id
-         JOIN Friends ON 1 = Friends.account_1_id OR 1 = Friends.account_2_id
-         WHERE (Posts.created_by = Friends.account_1_id OR Posts.created_by = Friends.account_2_id) AND Posts.created_by <> 1
-         AND (DownVotes.comment_id = -1 OR DownVotes.up_down IS NULL)
-         AND (DownVotes.up_down = 0 OR DownVotes.up_down IS NULL)
-         GROUP BY id) A
-GROUP BY id
-ORDER BY RATING DESC;
+SELECT Posts.*, diff FROM Posts
+    LEFT OUTER JOIN
+        (SELECT post_id, CAST(SUM(votes.up_down) as SIGNED) as diff FROM votes WHERE votes.comment_id = 0 GROUP BY votes.post_id) V ON V.post_id = posts.id
+    JOIN Friends ON 1 = Friends.account_1_id OR 1 = Friends.account_2_id
+    WHERE (Posts.created_by = Friends.account_1_id OR Posts.created_by = Friends.account_2_id) AND Posts.created_by <> 1
+    ORDER BY diff DESC;
 
 
 

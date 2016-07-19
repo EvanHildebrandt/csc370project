@@ -253,7 +253,6 @@ def change_subscription():
 #Friendship creation
 @app.route("/createfriendship/<friend_id>", methods=['GET', 'POST'])
 def create_friendship(friend_id):
-    print request.headers['Referer']
 
     if create_friendship(friend_id):
         flash(u'Friendship Created', 'success')
@@ -449,7 +448,6 @@ def get_votes(post_id, comment_id=0, useAccount=False):
     else:
         cursor.execute("SELECT up_down, COUNT(account_id) AS num FROM Votes WHERE post_id = %s AND comment_id = %s GROUP BY up_down", [post_id, comment_id])
         votes = cursor.fetchall()
-    print votes
     return votes
 
 def delete_post(post_id):
