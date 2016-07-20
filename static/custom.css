@@ -238,10 +238,16 @@ footer {
     margin-top: 40px;
 }
 
-.subsaiddit {
-    margin-top: 100px;
-}
-
 .subscribe {
     float: right;
+}
+
+.subsaiddit {
+    margin-top: 40px;
+}
+
+@media (min-width: 700px) {
+    .subsaiddit {
+        margin-top: 100px;
+    }
 }
