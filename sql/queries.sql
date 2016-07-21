@@ -1,4 +1,4 @@
--- 8a 
+-- 8a
 -- All posts created by account 1, sorted by highest rating
 SELECT Posts.*, diff FROM Posts
     LEFT OUTER JOIN
@@ -24,7 +24,7 @@ SELECT Posts.*, diff FROM Posts
 SELECT DISTINCT Subsaiddits.* FROM Accounts
     JOIN Subscribes on Accounts.id = Subscribes.account_id
     JOIN Subsaiddits on Subscribes.subsaiddit_id = Subsaiddits.id OR Subsaiddits.is_default = 1
-    Where Accounts.username = "A";
+    Where Accounts.username = "Evan";
 
 
 
@@ -33,7 +33,7 @@ SELECT DISTINCT Subsaiddits.* FROM Accounts
 SELECT Posts.* FROM Posts
     JOIN Favourites on Favourites.post_id = Posts.id
     JOIN Accounts on Accounts.id = Favourites.account_id
-    Where Accounts.username = "A";
+    Where Accounts.username = "Evan";
 
 
 
@@ -42,9 +42,9 @@ SELECT Posts.* FROM Posts
 -- Account "A"'s friend's favorite posts
 SELECT Posts.* FROM Accounts A1
     JOIN Friends ON A1.id = Friends.account_1_id OR A1.id = Friends.account_2_id
-    JOIN Accounts A2 ON (Friends.account_1_id = A2.id OR Friends.account_2_id = A2.id) AND A2.username <> "A"
+    JOIN Accounts A2 ON (Friends.account_1_id = A2.id OR Friends.account_2_id = A2.id) AND A2.username <> "Evan"
     JOIN Posts ON A2.id = Posts.created_by
-    Where A1.username = "A";
+    Where A1.username = "Evan";
 
 
 
@@ -52,10 +52,10 @@ SELECT Posts.* FROM Accounts A1
 -- Account "A"'s friend's subscribed subsaiddits
 SELECT DISTINCT Subsaiddits.* FROM Accounts A1
     JOIN Friends ON A1.id = Friends.account_1_id OR A1.id = Friends.account_2_id
-    JOIN Accounts A2 ON (Friends.account_1_id = A2.id OR Friends.account_2_id = A2.id) AND A2.username <> "A"
+    JOIN Accounts A2 ON (Friends.account_1_id = A2.id OR Friends.account_2_id = A2.id) AND A2.username <> "Evan"
     JOIN Subscribes on A2.id = Subscribes.account_id
     JOIN Subsaiddits on Subsaiddits.id = Subscribes.subsaiddit_id
-    Where A1.username = "A";
+    Where A1.username = "Evan";
 
 
 
@@ -63,7 +63,7 @@ SELECT DISTINCT Subsaiddits.* FROM Accounts A1
 -- Subsaiddit "S"'s creator's posts
 SELECT Posts.* FROM Posts
     JOIN Subsaiddits on Posts.created_by = Subsaiddits.created_by
-    WHERE Subsaiddits.subsaiddit_title = "S";
+    WHERE Subsaiddits.subsaiddit_title = "Jokes";
 
 
 
@@ -71,6 +71,6 @@ SELECT Posts.* FROM Posts
 -- Subsaiddit "S"'s posts that contain 'anyone'
 SELECT Posts.* FROM Posts
     JOIN Subsaiddits on Subsaiddits.id = Posts.subsaiddit
-    WHERE Subsaiddits.subsaiddit_title = "S"
-    AND (Subsaiddits.text_content LIKE '%anyone%'
-    OR Posts.text_content LIKE '%anyone%');
+    WHERE Subsaiddits.subsaiddit_title = "Jokes"
+    AND (Posts.title LIKE '%type%'
+    OR Posts.text_content LIKE '%type%');

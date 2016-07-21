@@ -17,7 +17,7 @@ app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 #Connect to database
 conn = MySQLdb.connect(
     host = 'localhost',
-    user = '',
+    user = 'user',
     passwd = '',
     db = 'saiddit',
     cursorclass=MySQLdb.cursors.DictCursor
@@ -41,16 +41,17 @@ class RegistrationForm(Form):
     confirm = PasswordField('Repeat Password')
 
 class LoginForm(Form):
-    username = StringField('Username', [validators.Length(min=4, max=25)])
+    username = StringField('Username', [validators.Length(min=4, max=128)])
     password = PasswordField('Password')
 
 class SubsaidditForm(Form):
-    title = StringField('Title', [validators.Length(min=4, max=25)])
+    title = StringField('Title', [validators.Length(min=4, max=128)])
     is_default = BooleanField('Is Default?')
-    description = StringField('Description', [validators.Length(min=4, max=25)])
+    description = StringField('Description', [validators.Length(min=4, max=128)])
 
 class PostForm(Form):
-    title = StringField('Title', [validators.Length(min=4, max=25)])
+    title = StringField('Title', [validators.Length(min=4, max=128)])
+    link = StringField('Link')
     text = StringField('Text', [validators.Length(min=4)])
 
 class CommentForm(Form):
@@ -83,6 +84,7 @@ def index():
     id_list = []
     for subsaiddit in subsaiddits:
         id_list.append(str(subsaiddit['id']))
+    print id_list
     posts = get_posts(id_list)
 
     return render_template(
@@ -172,7 +174,8 @@ def view_subsaiddit(subsaiddit_title):
             return redirect(url_for('login'))
         title = form.title.data
         text = form.text.data
-        if new_post(subsaiddit['id'], title, text):
+        link = form.link.data
+        if new_post(subsaiddit['id'], title, text, link):
             flash(u'Post Created', 'success')
 
     posts = get_posts([str(subsaiddit['id'])])
@@ -339,13 +342,13 @@ def new_subsaiddit(title, description, is_default):
         conn.commit()
         return True
 
-def new_post(subsaiddit_id, title, text):
+def new_post(subsaiddit_id, title, text, url=""):
     title = conn.escape(title)
     text = conn.escape(text)
     created = str(datetime.datetime.now())
     created_by = session['user']['id']
     subsaiddit = str(subsaiddit_id)
-    cursor.execute("INSERT INTO posts (title, text_content, created, created_by, subsaiddit) VALUES(%s,%s,%s,%s,%s)", [title, text, created, created_by, subsaiddit])
+    cursor.execute("INSERT INTO posts (title, text_content, created, created_by, subsaiddit, url) VALUES(%s,%s,%s,%s,%s,%s)", [title, text, created, created_by, subsaiddit, url])
     conn.commit()
     return True
 
@@ -377,15 +380,17 @@ def get_is_subscribed(subsaiddit_id):
 
 def get_posts(subsaiddits, page=1):
     id_list = ','.join(subsaiddits)
+    if id_list == "":
+        return []
     cursor.execute("""SELECT * FROM posts
                         LEFT OUTER JOIN
                             (SELECT post_id, CAST(SUM(votes.up_down) as SIGNED) as diff FROM votes WHERE votes.comment_id = 0 GROUP BY votes.post_id)
                             V ON V.post_id = posts.id
                         JOIN accounts ON posts.created_by = accounts.id
                         JOIN subsaiddits ON posts.subsaiddit = subsaiddits.id
-                        WHERE posts.subsaiddit IN (%s)
+                        WHERE posts.subsaiddit IN ("""+id_list+""")
                         ORDER BY diff
-                        DESC LIMIT 20""", [id_list])
+                        DESC LIMIT 20""")
     return cursor.fetchall()
 
 def get_user_posts(users, page=1):
